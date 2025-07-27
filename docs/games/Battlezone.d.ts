@@ -1,25 +1,29 @@
 import { GameEngine } from '../GameEngine';
 import { GameConfig } from '../types';
-export declare class Asteroids extends GameEngine {
-    private ship;
-    private bullets;
-    private asteroids;
+export declare class Battlezone extends GameEngine {
+    private player;
+    private enemies;
+    private projectiles;
+    private obstacles;
     private score;
     private lives;
     private gameState;
-    private shootCooldown;
-    private invulnerabilityTime;
+    private radar;
+    private crosshair;
+    private camera;
+    private horizon;
     constructor(container: HTMLElement | string, config?: GameConfig);
     private initGame;
-    private createAsteroids;
-    private createAsteroid;
-    private wrapPosition;
+    private generateWorld;
+    private spawnEnemyWave;
     protected handleKeyDown(event: KeyboardEvent): void;
-    protected handleKeyUp(event: KeyboardEvent): void;
     protected handleTouchStart(event: TouchEvent): void;
-    protected handleTouchEnd(event: TouchEvent): void;
     private shoot;
+    private updatePlayer;
+    private updateEnemies;
+    private updateProjectiles;
+    private updateRadar;
     protected update(): void;
-    private checkCollisions;
+    private project3D;
     protected render(): void;
 }

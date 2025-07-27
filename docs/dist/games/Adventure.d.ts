@@ -1,27 +1,21 @@
 import { GameEngine } from '../GameEngine';
 import { GameConfig } from '../types';
-export declare class SpaceInvaders extends GameEngine {
+export declare class Adventure extends GameEngine {
     private player;
-    private bullets;
-    private invaders;
+    private rooms;
+    private currentRoom;
     private score;
-    private lives;
     private gameState;
-    private invaderDirection;
-    private invaderDropTimer;
-    private shootCooldown;
+    private gameWon;
     constructor(container: HTMLElement | string, config?: GameConfig);
     private initGame;
-    private createInvaders;
+    private createRooms;
     protected handleKeyDown(event: KeyboardEvent): void;
     protected handleKeyUp(event: KeyboardEvent): void;
     protected handleTouchStart(event: TouchEvent): void;
     protected handleTouchEnd(event: TouchEvent): void;
-    private playerShoot;
-    private invaderShoot;
+    private attackDragon;
+    private checkWallCollision;
     protected update(): void;
-    private updateInvaders;
-    private checkBulletCollisions;
-    private checkCollision;
     protected render(): void;
 }

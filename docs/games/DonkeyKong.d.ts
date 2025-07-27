@@ -1,27 +1,33 @@
 import { GameEngine } from '../GameEngine';
 import { GameConfig } from '../types';
-export declare class SpaceInvaders extends GameEngine {
-    private player;
-    private bullets;
-    private invaders;
+export declare class DonkeyKong extends GameEngine {
+    private mario;
+    private platforms;
+    private ladders;
+    private barrels;
+    private princess;
+    private donkeyKong;
     private score;
     private lives;
     private gameState;
-    private invaderDirection;
-    private invaderDropTimer;
-    private shootCooldown;
+    private barrelTimer;
+    private gravity;
+    private jumpPower;
     constructor(container: HTMLElement | string, config?: GameConfig);
     private initGame;
-    private createInvaders;
+    private createLevel;
     protected handleKeyDown(event: KeyboardEvent): void;
     protected handleKeyUp(event: KeyboardEvent): void;
     protected handleTouchStart(event: TouchEvent): void;
     protected handleTouchEnd(event: TouchEvent): void;
-    private playerShoot;
-    private invaderShoot;
+    private jump;
+    private checkPlatformCollision;
+    private checkLadderCollision;
     protected update(): void;
-    private updateInvaders;
-    private checkBulletCollisions;
-    private checkCollision;
+    private updateMario;
+    private resetMario;
+    private spawnBarrel;
+    private updateBarrels;
+    private checkCollisions;
     protected render(): void;
 }

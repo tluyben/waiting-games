@@ -1,0 +1,32 @@
+import { GameEngine } from '../GameEngine';
+import { GameConfig } from '../types';
+export declare class LunarLander extends GameEngine {
+    private lander;
+    private terrain;
+    private particles;
+    private score;
+    private gameState;
+    private gravity;
+    private thrusting;
+    private rotatingLeft;
+    private rotatingRight;
+    private altitude;
+    private speed;
+    private landingScore;
+    constructor(container: HTMLElement | string, config?: GameConfig);
+    private initGame;
+    private generateTerrain;
+    protected handleKeyDown(event: KeyboardEvent): void;
+    protected handleKeyUp(event: KeyboardEvent): void;
+    protected handleTouchStart(event: TouchEvent): void;
+    protected handleTouchEnd(event: TouchEvent): void;
+    private updateLander;
+    private getAltitude;
+    private getGroundHeight;
+    private checkTerrainCollision;
+    private createThrustParticles;
+    private createCrashParticles;
+    private updateParticles;
+    protected update(): void;
+    protected render(): void;
+}

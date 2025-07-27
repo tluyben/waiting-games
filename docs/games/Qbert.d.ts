@@ -1,0 +1,36 @@
+import { GameEngine } from '../GameEngine';
+import { GameConfig } from '../types';
+export declare class Qbert extends GameEngine {
+    private qbert;
+    private cubes;
+    private enemies;
+    private score;
+    private lives;
+    private level;
+    private gameState;
+    private pyramidSize;
+    private cubeSize;
+    private jumpDuration;
+    private enemySpawnTimer;
+    constructor(container: HTMLElement | string, config?: GameConfig);
+    private initGame;
+    private initLevel;
+    private createPyramid;
+    private updateQBertPosition;
+    private isValidPosition;
+    protected handleKeyDown(event: KeyboardEvent): void;
+    protected handleKeyUp(event: KeyboardEvent): void;
+    protected handleTouchStart(event: TouchEvent): void;
+    private moveQBert;
+    private startJump;
+    private resetQBert;
+    private spawnEnemy;
+    private updateEnemies;
+    private moveEnemy;
+    private checkCollisions;
+    private checkWinCondition;
+    protected update(): void;
+    protected render(): void;
+    private drawCube;
+    private darkenColor;
+}

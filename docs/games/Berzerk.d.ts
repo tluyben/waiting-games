@@ -1,27 +1,31 @@
 import { GameEngine } from '../GameEngine';
 import { GameConfig } from '../types';
-export declare class SpaceInvaders extends GameEngine {
+export declare class Berzerk extends GameEngine {
     private player;
+    private robots;
     private bullets;
-    private invaders;
+    private walls;
+    private exits;
     private score;
     private lives;
+    private level;
     private gameState;
-    private invaderDirection;
-    private invaderDropTimer;
-    private shootCooldown;
+    private roomWidth;
+    private roomHeight;
+    private cellSize;
+    private evilOtto;
     constructor(container: HTMLElement | string, config?: GameConfig);
     private initGame;
-    private createInvaders;
+    private generateRoom;
     protected handleKeyDown(event: KeyboardEvent): void;
-    protected handleKeyUp(event: KeyboardEvent): void;
     protected handleTouchStart(event: TouchEvent): void;
     protected handleTouchEnd(event: TouchEvent): void;
-    private playerShoot;
-    private invaderShoot;
+    private shoot;
+    private checkWallCollision;
+    private hasLineOfSight;
+    private updatePlayer;
+    private updateRobots;
+    private updateBullets;
     protected update(): void;
-    private updateInvaders;
-    private checkBulletCollisions;
-    private checkCollision;
     protected render(): void;
 }

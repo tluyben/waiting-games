@@ -1,0 +1,34 @@
+import { GameEngine } from '../GameEngine';
+import { GameConfig } from '../types';
+export declare class CircusAtari extends GameEngine {
+    private clowns;
+    private seesaw;
+    private balloons;
+    private particles;
+    private score;
+    private lives;
+    private level;
+    private gameState;
+    private gravity;
+    private seesawBounce;
+    private currentClown;
+    private balloonTimer;
+    private balloonSpawnRate;
+    constructor(container: HTMLElement | string, config?: GameConfig);
+    private initGame;
+    private updateSeesawPositions;
+    private spawnInitialBalloons;
+    private spawnNewBalloon;
+    protected handleKeyDown(event: KeyboardEvent): void;
+    protected handleTouchStart(event: TouchEvent): void;
+    private launchClown;
+    private updateClowns;
+    private checkBalloonCollisions;
+    private checkSeesawLanding;
+    private resetClown;
+    private createPopParticles;
+    private updateBalloons;
+    private updateParticles;
+    protected update(): void;
+    protected render(): void;
+}

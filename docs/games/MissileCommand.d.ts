@@ -1,24 +1,30 @@
 import { GameEngine } from '../GameEngine';
 import { GameConfig } from '../types';
-export declare class Breakout extends GameEngine {
-    private ball;
-    private paddle;
-    private bricks;
+export declare class MissileCommand extends GameEngine {
+    private cities;
+    private missiles;
+    private defenseMissiles;
+    private explosions;
+    private batteries;
     private score;
-    private lives;
+    private level;
     private gameState;
+    private missileSpawnTimer;
+    private missileSpawnRate;
+    private crosshair;
     constructor(container: HTMLElement | string, config?: GameConfig);
     private initGame;
-    private createBricks;
-    private launchBall;
+    private initLevel;
     protected handleKeyDown(event: KeyboardEvent): void;
     protected handleKeyUp(event: KeyboardEvent): void;
     protected handleTouchStart(event: TouchEvent): void;
     protected handleTouchMove(event: TouchEvent): void;
-    private clampPaddle;
+    private fireMissile;
+    private spawnMissile;
+    private updateMissiles;
+    private updateDefenseMissiles;
+    private createExplosion;
+    private updateExplosions;
     protected update(): void;
-    private checkPaddleCollision;
-    private checkBrickCollisions;
-    private resetBall;
     protected render(): void;
 }

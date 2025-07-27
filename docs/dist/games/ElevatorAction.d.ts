@@ -1,0 +1,34 @@
+import { GameEngine } from '../GameEngine';
+import { GameConfig } from '../types';
+export declare class ElevatorAction extends GameEngine {
+    private player;
+    private enemies;
+    private elevators;
+    private floors;
+    private bullets;
+    private score;
+    private lives;
+    private level;
+    private gameState;
+    private secretDoors;
+    private secretsCollected;
+    private buildingHeight;
+    private floorHeight;
+    private numFloors;
+    constructor(container: HTMLElement | string, config?: GameConfig);
+    private initGame;
+    private generateBuilding;
+    private spawnEnemies;
+    protected handleKeyDown(event: KeyboardEvent): void;
+    protected handleTouchStart(event: TouchEvent): void;
+    protected handleTouchEnd(event: TouchEvent): void;
+    private shoot;
+    private useElevator;
+    private updatePlayer;
+    private checkDoorInteractions;
+    private updateElevators;
+    private updateEnemies;
+    private updateBullets;
+    protected update(): void;
+    protected render(): void;
+}
