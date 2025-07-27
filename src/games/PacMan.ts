@@ -154,13 +154,13 @@ export class PacMan extends GameEngine {
       return;
     }
 
-    if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w') {
+    if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w' || event.key === 'ArrowUp') {
       this.pacman.nextDirection = Direction.UP;
-    } else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's') {
+    } else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's' || event.key === 'ArrowDown') {
       this.pacman.nextDirection = Direction.DOWN;
-    } else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a') {
+    } else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a' || event.key === 'ArrowLeft') {
       this.pacman.nextDirection = Direction.LEFT;
-    } else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd') {
+    } else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd' || event.key === 'ArrowRight') {
       this.pacman.nextDirection = Direction.RIGHT;
     }
   }

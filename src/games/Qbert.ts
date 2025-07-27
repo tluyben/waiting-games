@@ -132,13 +132,13 @@ export class Qbert extends GameEngine {
     if (this.qbert.isJumping) return;
 
     // Diagonal movement for Q*bert
-    if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w') {
+    if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w' || event.key === 'ArrowUp') {
       this.moveQBert(-1, -1); // Up-left
-    } else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's') {
+    } else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's' || event.key === 'ArrowDown') {
       this.moveQBert(1, 1); // Down-right
-    } else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a') {
+    } else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a' || event.key === 'ArrowLeft') {
       this.moveQBert(0, -1); // Up-right
-    } else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd') {
+    } else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd' || event.key === 'ArrowRight') {
       this.moveQBert(-1, 0); // Down-left
     }
   }

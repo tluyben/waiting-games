@@ -11,7 +11,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "rollup -c && cp -r dist/ docs/",
+    "build": "rollup -c && rm -rf docs/dist && cp -r dist docs/",
     "dev": "rollup -c -w",
     "test": "jest",
     "clean": "rm -rf dist/ docs/dist/",

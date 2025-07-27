@@ -140,6 +140,9 @@
             this.gridSize = 20;
             this.score = 0;
             this.gameOver = false;
+            this.gameState = 'waiting';
+            this.moveTimer = 0;
+            this.moveInterval = 12; // Move every 12 frames (5 times per second at 60fps) - Slightly faster
             this.initGame();
         }
         initGame() {
@@ -147,7 +150,9 @@
             this.generateFood();
             this.score = 0;
             this.gameOver = false;
+            this.gameState = 'waiting';
             this.direction = Direction$1.RIGHT;
+            this.moveTimer = 0;
         }
         generateFood() {
             const maxX = Math.floor(this.config.width / this.gridSize);
@@ -159,22 +164,22 @@
         }
         handleKeyDown(event) {
             super.handleKeyDown(event);
-            if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w') {
+            if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w' || event.key === 'ArrowUp') {
                 if (this.direction !== Direction$1.DOWN) {
                     this.direction = Direction$1.UP;
                 }
             }
-            else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's') {
+            else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's' || event.key === 'ArrowDown') {
                 if (this.direction !== Direction$1.UP) {
                     this.direction = Direction$1.DOWN;
                 }
             }
-            else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a') {
+            else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a' || event.key === 'ArrowLeft') {
                 if (this.direction !== Direction$1.RIGHT) {
                     this.direction = Direction$1.LEFT;
                 }
             }
-            else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd') {
+            else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd' || event.key === 'ArrowRight') {
                 if (this.direction !== Direction$1.LEFT) {
                     this.direction = Direction$1.RIGHT;
                 }
@@ -184,6 +189,9 @@
                     this.initGame();
                     this.start();
                 }
+                else if (this.gameState === 'waiting') {
+                    this.gameState = 'playing';
+                }
             }
         }
         handleTouchStart(event) {
@@ -191,6 +199,10 @@
             if (this.gameOver) {
                 this.initGame();
                 this.start();
+                return;
+            }
+            if (this.gameState === 'waiting') {
+                this.gameState = 'playing';
                 return;
             }
             const touch = event.touches[0];
@@ -219,8 +231,14 @@
             }
         }
         update() {
-            if (this.gameOver)
+            if (this.gameOver || this.gameState !== 'playing')
                 return;
+            // Only move snake at controlled intervals (frame counting like Tetris)
+            this.moveTimer++;
+            if (this.moveTimer < this.moveInterval) {
+                return;
+            }
+            this.moveTimer = 0;
             const head = { ...this.snake[0] };
             switch (this.direction) {
                 case Direction$1.UP:
@@ -268,7 +286,18 @@
             this.ctx.fillStyle = '#fff';
             this.ctx.font = '20px Arial';
             this.ctx.fillText(`Score: ${this.score}`, 10, 30);
-            if (this.gameOver) {
+            if (this.gameState === 'waiting') {
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+                this.ctx.fillStyle = '#fff';
+                this.ctx.font = '30px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('Snake', this.config.width / 2, this.config.height / 2 - 20);
+                this.ctx.font = '16px Arial';
+                this.ctx.fillText('Press SPACE or tap to start', this.config.width / 2, this.config.height / 2 + 10);
+                this.ctx.textAlign = 'left';
+            }
+            else if (this.gameOver) {
                 this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 this.ctx.fillRect(0, 0, this.config.width, this.config.height);
                 this.ctx.fillStyle = '#fff';
@@ -283,11 +312,7 @@
         }
         start() {
             super.start();
-            setInterval(() => {
-                if (this.isRunning && !this.isPaused && !this.gameOver) {
-                    this.update();
-                }
-            }, 150);
+            this.moveTimer = 0;
         }
     }
 
@@ -1048,16 +1073,16 @@
                 }
                 return;
             }
-            if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a') {
+            if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a' || event.key === 'ArrowLeft') {
                 this.movePiece(-1, 0);
             }
-            else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd') {
+            else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd' || event.key === 'ArrowRight') {
                 this.movePiece(1, 0);
             }
-            else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's') {
+            else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's' || event.key === 'ArrowDown') {
                 this.movePiece(0, 1);
             }
-            else if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w') {
+            else if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w' || event.key === 'ArrowUp') {
                 this.rotatePiece();
             }
             else if (event.key === ' ') {
@@ -1384,16 +1409,16 @@
                 }
                 return;
             }
-            if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w') {
+            if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w' || event.key === 'ArrowUp') {
                 this.pacman.nextDirection = Direction.UP;
             }
-            else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's') {
+            else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's' || event.key === 'ArrowDown') {
                 this.pacman.nextDirection = Direction.DOWN;
             }
-            else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a') {
+            else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a' || event.key === 'ArrowLeft') {
                 this.pacman.nextDirection = Direction.LEFT;
             }
-            else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd') {
+            else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd' || event.key === 'ArrowRight') {
                 this.pacman.nextDirection = Direction.RIGHT;
             }
         }
@@ -2163,16 +2188,16 @@
                 }
                 return;
             }
-            if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w') {
+            if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w' || event.key === 'ArrowUp') {
                 this.moveFrog(0, -1);
             }
-            else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's') {
+            else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's' || event.key === 'ArrowDown') {
                 this.moveFrog(0, 1);
             }
-            else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a') {
+            else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a' || event.key === 'ArrowLeft') {
                 this.moveFrog(-1, 0);
             }
-            else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd') {
+            else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd' || event.key === 'ArrowRight') {
                 this.moveFrog(1, 0);
             }
         }
@@ -2953,16 +2978,16 @@
             if (this.qbert.isJumping)
                 return;
             // Diagonal movement for Q*bert
-            if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w') {
+            if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w' || event.key === 'ArrowUp') {
                 this.moveQBert(-1, -1); // Up-left
             }
-            else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's') {
+            else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's' || event.key === 'ArrowDown') {
                 this.moveQBert(1, 1); // Down-right
             }
-            else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a') {
+            else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a' || event.key === 'ArrowLeft') {
                 this.moveQBert(0, -1); // Up-right
             }
-            else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd') {
+            else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd' || event.key === 'ArrowRight') {
                 this.moveQBert(-1, 0); // Down-left
             }
         }
@@ -3762,16 +3787,16 @@
             // Player movement
             let newX = this.player.x;
             let newY = this.player.y;
-            if (this.keys[this.keyMap.LEFT] || this.keys['a'] || this.keys['A'] || this.keys['touchLeft']) {
+            if (this.keys[this.keyMap.LEFT] || this.keys['a'] || this.keys['A'] || this.keys['ArrowLeft'] || this.keys['touchLeft']) {
                 newX -= this.player.speed;
             }
-            if (this.keys[this.keyMap.RIGHT] || this.keys['d'] || this.keys['D'] || this.keys['touchRight']) {
+            if (this.keys[this.keyMap.RIGHT] || this.keys['d'] || this.keys['D'] || this.keys['ArrowRight'] || this.keys['touchRight']) {
                 newX += this.player.speed;
             }
-            if (this.keys[this.keyMap.UP] || this.keys['w'] || this.keys['W'] || this.keys['touchUp']) {
+            if (this.keys[this.keyMap.UP] || this.keys['w'] || this.keys['W'] || this.keys['ArrowUp'] || this.keys['touchUp']) {
                 newY -= this.player.speed;
             }
-            if (this.keys[this.keyMap.DOWN] || this.keys['s'] || this.keys['S'] || this.keys['touchDown']) {
+            if (this.keys[this.keyMap.DOWN] || this.keys['s'] || this.keys['S'] || this.keys['ArrowDown'] || this.keys['touchDown']) {
                 newY += this.player.speed;
             }
             // Check wall collisions

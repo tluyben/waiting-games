@@ -215,13 +215,13 @@ export class Frogger extends GameEngine {
       return;
     }
 
-    if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w') {
+    if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w' || event.key === 'ArrowUp') {
       this.moveFrog(0, -1);
-    } else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's') {
+    } else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's' || event.key === 'ArrowDown') {
       this.moveFrog(0, 1);
-    } else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a') {
+    } else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a' || event.key === 'ArrowLeft') {
       this.moveFrog(-1, 0);
-    } else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd') {
+    } else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd' || event.key === 'ArrowRight') {
       this.moveFrog(1, 0);
     }
   }

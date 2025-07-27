@@ -256,16 +256,16 @@ export class Adventure extends GameEngine {
     let newX = this.player.x;
     let newY = this.player.y;
 
-    if (this.keys[this.keyMap.LEFT] || this.keys['a'] || this.keys['A'] || this.keys['touchLeft']) {
+    if (this.keys[this.keyMap.LEFT] || this.keys['a'] || this.keys['A'] || this.keys['ArrowLeft'] || this.keys['touchLeft']) {
       newX -= this.player.speed;
     }
-    if (this.keys[this.keyMap.RIGHT] || this.keys['d'] || this.keys['D'] || this.keys['touchRight']) {
+    if (this.keys[this.keyMap.RIGHT] || this.keys['d'] || this.keys['D'] || this.keys['ArrowRight'] || this.keys['touchRight']) {
       newX += this.player.speed;
     }
-    if (this.keys[this.keyMap.UP] || this.keys['w'] || this.keys['W'] || this.keys['touchUp']) {
+    if (this.keys[this.keyMap.UP] || this.keys['w'] || this.keys['W'] || this.keys['ArrowUp'] || this.keys['touchUp']) {
       newY -= this.player.speed;
     }
-    if (this.keys[this.keyMap.DOWN] || this.keys['s'] || this.keys['S'] || this.keys['touchDown']) {
+    if (this.keys[this.keyMap.DOWN] || this.keys['s'] || this.keys['S'] || this.keys['ArrowDown'] || this.keys['touchDown']) {
       newY += this.player.speed;
     }
 

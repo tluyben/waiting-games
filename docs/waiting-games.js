@@ -140,8 +140,8 @@
             this.gridSize = 20;
             this.score = 0;
             this.gameOver = false;
-            this.lastMoveTime = 0;
-            this.moveInterval = 1000; // Move every 1000ms (1 move per second)
+            this.moveTimer = 0;
+            this.moveInterval = 120; // Move every 120 frames (0.5 times per second at 60fps) - VERY SLOW
             this.initGame();
         }
         initGame() {
@@ -150,7 +150,7 @@
             this.score = 0;
             this.gameOver = false;
             this.direction = Direction$1.RIGHT;
-            this.lastMoveTime = 0;
+            this.moveTimer = 0;
         }
         generateFood() {
             const maxX = Math.floor(this.config.width / this.gridSize);
@@ -224,14 +224,14 @@
         update() {
             if (this.gameOver)
                 return;
-            // Only move snake at controlled intervals
-            const currentTime = Date.now();
-            const timeSinceLastMove = currentTime - this.lastMoveTime;
-            if (timeSinceLastMove < this.moveInterval) {
+            // Only move snake at controlled intervals (frame counting like Tetris)
+            this.moveTimer++;
+            console.log('Timer:', this.moveTimer, 'Interval:', this.moveInterval);
+            if (this.moveTimer < this.moveInterval) {
                 return;
             }
-            console.log('Snake moving! Time since last move:', timeSinceLastMove);
-            this.lastMoveTime = currentTime;
+            console.log('SNAKE ACTUALLY MOVING NOW!!!');
+            this.moveTimer = 0;
             const head = { ...this.snake[0] };
             switch (this.direction) {
                 case Direction$1.UP:
@@ -294,7 +294,7 @@
         }
         start() {
             super.start();
-            this.lastMoveTime = Date.now();
+            this.moveTimer = 0;
         }
     }
 

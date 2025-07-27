@@ -129,13 +129,13 @@ export class Tetris extends GameEngine {
       return;
     }
 
-    if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a') {
+    if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a' || event.key === 'ArrowLeft') {
       this.movePiece(-1, 0);
-    } else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd') {
+    } else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd' || event.key === 'ArrowRight') {
       this.movePiece(1, 0);
-    } else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's') {
+    } else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's' || event.key === 'ArrowDown') {
       this.movePiece(0, 1);
-    } else if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w') {
+    } else if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w' || event.key === 'ArrowUp') {
       this.rotatePiece();
     } else if (event.key === ' ') {
       this.dropPiece();

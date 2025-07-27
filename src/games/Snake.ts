@@ -15,8 +15,9 @@ export class Snake extends GameEngine {
   private gridSize = 20;
   private score = 0;
   private gameOver = false;
-  private lastMoveTime = 0;
-  private moveInterval = 1000; // Move every 1000ms (1 move per second)
+  private gameState: 'waiting' | 'playing' = 'waiting';
+  private moveTimer = 0;
+  private moveInterval = 12; // Move every 12 frames (5 times per second at 60fps) - Slightly faster
 
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     super(container, config);
@@ -28,8 +29,9 @@ export class Snake extends GameEngine {
     this.generateFood();
     this.score = 0;
     this.gameOver = false;
+    this.gameState = 'waiting';
     this.direction = Direction.RIGHT;
-    this.lastMoveTime = 0;
+    this.moveTimer = 0;
   }
 
   private generateFood(): void {
@@ -45,19 +47,19 @@ export class Snake extends GameEngine {
   protected handleKeyDown(event: KeyboardEvent): void {
     super.handleKeyDown(event);
     
-    if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w') {
+    if (this.isKeyPressed('UP', event) || event.key.toLowerCase() === 'w' || event.key === 'ArrowUp') {
       if (this.direction !== Direction.DOWN) {
         this.direction = Direction.UP;
       }
-    } else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's') {
+    } else if (this.isKeyPressed('DOWN', event) || event.key.toLowerCase() === 's' || event.key === 'ArrowDown') {
       if (this.direction !== Direction.UP) {
         this.direction = Direction.DOWN;
       }
-    } else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a') {
+    } else if (this.isKeyPressed('LEFT', event) || event.key.toLowerCase() === 'a' || event.key === 'ArrowLeft') {
       if (this.direction !== Direction.RIGHT) {
         this.direction = Direction.LEFT;
       }
-    } else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd') {
+    } else if (this.isKeyPressed('RIGHT', event) || event.key.toLowerCase() === 'd' || event.key === 'ArrowRight') {
       if (this.direction !== Direction.LEFT) {
         this.direction = Direction.RIGHT;
       }
@@ -65,6 +67,8 @@ export class Snake extends GameEngine {
       if (this.gameOver) {
         this.initGame();
         this.start();
+      } else if (this.gameState === 'waiting') {
+        this.gameState = 'playing';
       }
     }
   }
@@ -75,6 +79,11 @@ export class Snake extends GameEngine {
     if (this.gameOver) {
       this.initGame();
       this.start();
+      return;
+    }
+
+    if (this.gameState === 'waiting') {
+      this.gameState = 'playing';
       return;
     }
 
@@ -105,17 +114,14 @@ export class Snake extends GameEngine {
   }
 
   protected update(): void {
-    if (this.gameOver) return;
+    if (this.gameOver || this.gameState !== 'playing') return;
 
-    // Only move snake at controlled intervals
-    const currentTime = Date.now();
-    const timeSinceLastMove = currentTime - this.lastMoveTime;
-    if (timeSinceLastMove < this.moveInterval) {
+    // Only move snake at controlled intervals (frame counting like Tetris)
+    this.moveTimer++;
+    if (this.moveTimer < this.moveInterval) {
       return;
     }
-    
-    console.log('Snake moving! Time since last move:', timeSinceLastMove);
-    this.lastMoveTime = currentTime;
+    this.moveTimer = 0;
 
     const head = { ...this.snake[0] };
 
@@ -173,7 +179,20 @@ export class Snake extends GameEngine {
     this.ctx.font = '20px Arial';
     this.ctx.fillText(`Score: ${this.score}`, 10, 30);
 
-    if (this.gameOver) {
+    if (this.gameState === 'waiting') {
+      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+      
+      this.ctx.fillStyle = '#fff';
+      this.ctx.font = '30px Arial';
+      this.ctx.textAlign = 'center';
+      this.ctx.fillText('Snake', this.config.width / 2, this.config.height / 2 - 20);
+      
+      this.ctx.font = '16px Arial';
+      this.ctx.fillText('Press SPACE or tap to start', this.config.width / 2, this.config.height / 2 + 10);
+      
+      this.ctx.textAlign = 'left';
+    } else if (this.gameOver) {
       this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
       this.ctx.fillRect(0, 0, this.config.width, this.config.height);
       
@@ -192,6 +211,6 @@ export class Snake extends GameEngine {
 
   start(): void {
     super.start();
-    this.lastMoveTime = Date.now();
+    this.moveTimer = 0;
   }
 }
