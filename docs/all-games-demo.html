@@ -113,7 +113,7 @@
 <body>
     <div class="header">
         <h1>🕹️ Waiting Games - Complete Demo</h1>
-        <p>All available retro games with custom key mapping support</p>
+        <p>All 20 classic retro arcade games (1970s-1980s) with custom key mapping support</p>
     </div>
 
     <div class="games-grid">
@@ -293,8 +293,7 @@
                 <h4>Controls:</h4>
                 <ul>
                     <li><strong>Move:</strong> A/D or ←/→</li>
-                    <li><strong>Jump:</strong> W or ↑</li>
-                    <li><strong>Climb:</strong> W/S or ↑/↓ on ladders</li>
+                    <li><strong>Jump/Climb:</strong> W or ↑</li>
                     <li><strong>Mobile:</strong> Tap to move and jump</li>
                 </ul>
             </div>
@@ -313,9 +312,8 @@
             <div class="controls">
                 <h4>Controls:</h4>
                 <ul>
-                    <li><strong>Move:</strong> Arrow keys or WASD</li>
+                    <li><strong>Move:</strong> Arrow keys or WASD to hop diagonally</li>
                     <li><strong>Mobile:</strong> Tap to hop in direction</li>
-                    <li><strong>Goal:</strong> Change all cube colors while avoiding Coily and friends</li>
                 </ul>
             </div>
             <div class="game-buttons">
@@ -335,7 +333,6 @@
                 <ul>
                     <li><strong>Move Bucket:</strong> A/D or ←/→</li>
                     <li><strong>Mobile:</strong> Touch to position bucket</li>
-                    <li><strong>Goal:</strong> Catch bombs before they hit the ground</li>
                 </ul>
             </div>
             <div class="game-buttons">
@@ -347,14 +344,14 @@
 
         <!-- Adventure -->
         <div class="game-card">
-            <h2 class="game-title">🗝️ Adventure</h2>
-            <p class="game-description">Explore rooms, find the key and sword, slay the dragon, get the chalice!</p>
+            <h2 class="game-title">🗡️ Adventure</h2>
+            <p class="game-description">Explore rooms, find the key and sword, slay the dragon!</p>
             <div class="game-container" id="adventure-game"></div>
             <div class="controls">
                 <h4>Controls:</h4>
                 <ul>
                     <li><strong>Move:</strong> Arrow keys or WASD</li>
-                    <li><strong>Attack:</strong> Space (when you have sword)</li>
+                    <li><strong>Attack:</strong> Space</li>
                     <li><strong>Mobile:</strong> Tap to move and attack</li>
                 </ul>
             </div>
@@ -373,9 +370,9 @@
             <div class="controls">
                 <h4>Controls:</h4>
                 <ul>
-                    <li><strong>Move Crosshair:</strong> WASD or mouse/touch</li>
-                    <li><strong>Fire Missile:</strong> Space or tap</li>
-                    <li><strong>Goal:</strong> Protect your cities and missile batteries</li>
+                    <li><strong>Move Crosshair:</strong> WASD</li>
+                    <li><strong>Fire:</strong> Space</li>
+                    <li><strong>Mobile:</strong> Touch to aim and fire</li>
                 </ul>
             </div>
             <div class="game-buttons">
@@ -384,10 +381,150 @@
                 <button onclick="stopGame('missilecommand')">Stop</button>
             </div>
         </div>
+
+        <!-- Joust -->
+        <div class="game-card">
+            <h2 class="game-title">🐎 Joust</h2>
+            <p class="game-description">Flying ostrich combat with realistic physics!</p>
+            <div class="game-container" id="joust-game"></div>
+            <div class="controls">
+                <h4>Controls:</h4>
+                <ul>
+                    <li><strong>Fly:</strong> A/D to move left/right</li>
+                    <li><strong>Flap:</strong> W to flap wings</li>
+                    <li><strong>Mobile:</strong> Tap sides to move, tap to flap</li>
+                </ul>
+            </div>
+            <div class="game-buttons">
+                <button onclick="startGame('joust')">Start</button>
+                <button onclick="pauseGame('joust')">Pause</button>
+                <button onclick="stopGame('joust')">Stop</button>
+            </div>
+        </div>
+
+        <!-- Lunar Lander -->
+        <div class="game-card">
+            <h2 class="game-title">🌙 Lunar Lander</h2>
+            <p class="game-description">Land your spacecraft safely on the moon surface!</p>
+            <div class="game-container" id="lunarlander-game"></div>
+            <div class="controls">
+                <h4>Controls:</h4>
+                <ul>
+                    <li><strong>Rotate:</strong> A/D</li>
+                    <li><strong>Thrust:</strong> W</li>
+                    <li><strong>Mobile:</strong> Tap sides to rotate, top to thrust</li>
+                </ul>
+            </div>
+            <div class="game-buttons">
+                <button onclick="startGame('lunarlander')">Start</button>
+                <button onclick="pauseGame('lunarlander')">Pause</button>
+                <button onclick="stopGame('lunarlander')">Stop</button>
+            </div>
+        </div>
+
+        <!-- Battlezone -->
+        <div class="game-card">
+            <h2 class="game-title">🎯 Battlezone</h2>
+            <p class="game-description">3D tank combat in wireframe vector graphics!</p>
+            <div class="game-container" id="battlezone-game"></div>
+            <div class="controls">
+                <h4>Controls:</h4>
+                <ul>
+                    <li><strong>Turn:</strong> A/D</li>
+                    <li><strong>Move:</strong> W/S</li>
+                    <li><strong>Fire:</strong> Space</li>
+                    <li><strong>Mobile:</strong> Touch controls</li>
+                </ul>
+            </div>
+            <div class="game-buttons">
+                <button onclick="startGame('battlezone')">Start</button>
+                <button onclick="pauseGame('battlezone')">Pause</button>
+                <button onclick="stopGame('battlezone')">Stop</button>
+            </div>
+        </div>
+
+        <!-- Berzerk -->
+        <div class="game-card">
+            <h2 class="game-title">🤖 Berzerk</h2>
+            <p class="game-description">Navigate robot-filled mazes and survive Evil Otto!</p>
+            <div class="game-container" id="berzerk-game"></div>
+            <div class="controls">
+                <h4>Controls:</h4>
+                <ul>
+                    <li><strong>Move:</strong> WASD</li>
+                    <li><strong>Fire:</strong> Space</li>
+                    <li><strong>Mobile:</strong> Tap to move and shoot</li>
+                </ul>
+            </div>
+            <div class="game-buttons">
+                <button onclick="startGame('berzerk')">Start</button>
+                <button onclick="pauseGame('berzerk')">Pause</button>
+                <button onclick="stopGame('berzerk')">Stop</button>
+            </div>
+        </div>
+
+        <!-- Circus Atari -->
+        <div class="game-card">
+            <h2 class="game-title">🎪 Circus Atari</h2>
+            <p class="game-description">Bounce clowns to pop balloons in this physics game!</p>
+            <div class="game-container" id="circusatari-game"></div>
+            <div class="controls">
+                <h4>Controls:</h4>
+                <ul>
+                    <li><strong>Move Seesaw:</strong> A/D</li>
+                    <li><strong>Mobile:</strong> Touch to position seesaw</li>
+                </ul>
+            </div>
+            <div class="game-buttons">
+                <button onclick="startGame('circusatari')">Start</button>
+                <button onclick="pauseGame('circusatari')">Pause</button>
+                <button onclick="stopGame('circusatari')">Stop</button>
+            </div>
+        </div>
+
+        <!-- Elevator Action -->
+        <div class="game-card">
+            <h2 class="game-title">🕵️ Elevator Action</h2>
+            <p class="game-description">Spy infiltration with elevators and secret documents!</p>
+            <div class="game-container" id="elevatoraction-game"></div>
+            <div class="controls">
+                <h4>Controls:</h4>
+                <ul>
+                    <li><strong>Move:</strong> WASD</li>
+                    <li><strong>Fire/Enter:</strong> Space</li>
+                    <li><strong>Mobile:</strong> Touch controls</li>
+                </ul>
+            </div>
+            <div class="game-buttons">
+                <button onclick="startGame('elevatoraction')">Start</button>
+                <button onclick="pauseGame('elevatoraction')">Pause</button>
+                <button onclick="stopGame('elevatoraction')">Stop</button>
+            </div>
+        </div>
+
+        <!-- Dig Dug -->
+        <div class="game-card">
+            <h2 class="game-title">⛏️ Dig Dug</h2>
+            <p class="game-description">Dig tunnels underground and inflate enemies!</p>
+            <div class="game-container" id="digdug-game"></div>
+            <div class="controls">
+                <h4>Controls:</h4>
+                <ul>
+                    <li><strong>Move/Dig:</strong> WASD</li>
+                    <li><strong>Pump:</strong> Space (hold to inflate)</li>
+                    <li><strong>Mobile:</strong> Tap to move, hold to pump</li>
+                </ul>
+            </div>
+            <div class="game-buttons">
+                <button onclick="startGame('digdug')">Start</button>
+                <button onclick="pauseGame('digdug')">Pause</button>
+                <button onclick="stopGame('digdug')">Stop</button>
+            </div>
+        </div>
     </div>
 
     <!-- Include the waiting-games library -->
-    <script src="dist/waiting-games.js"></script>
+    <script src="../dist/waiting-games.js"></script>
     
     <script>
         const games = {};
@@ -502,6 +639,62 @@
                 useMobile: true,
                 width: 500,
                 height: 400
+            });
+            
+            // Joust
+            games.joust = WaitingGames.createGame('joust', '#joust-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300
+            });
+            
+            // Lunar Lander
+            games.lunarlander = WaitingGames.createGame('lunarlander', '#lunarlander-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300
+            });
+            
+            // Battlezone
+            games.battlezone = WaitingGames.createGame('battlezone', '#battlezone-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300
+            });
+            
+            // Berzerk
+            games.berzerk = WaitingGames.createGame('berzerk', '#berzerk-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300
+            });
+            
+            // Circus Atari
+            games.circusatari = WaitingGames.createGame('circusatari', '#circusatari-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300
+            });
+            
+            // Elevator Action
+            games.elevatoraction = WaitingGames.createGame('elevatoraction', '#elevatoraction-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300
+            });
+            
+            // Dig Dug
+            games.digdug = WaitingGames.createGame('digdug', '#digdug-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 512,
+                height: 384
             });
             
             // Auto-start all games
