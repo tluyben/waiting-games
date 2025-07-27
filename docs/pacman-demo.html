@@ -196,6 +196,49 @@
             transform: scale(1.05);
         }
 
+        .view-toggle {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #FFCC00;
+            text-align: center;
+        }
+
+        .view-toggle h4 {
+            color: #FFFF00;
+            margin: 0 0 10px 0;
+            font-size: 10px;
+        }
+
+        .size-button {
+            background: #000080;
+            color: #FFFF00;
+            border: 1px solid #FFCC00;
+            padding: 8px 15px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: all 0.2s;
+        }
+
+        .size-button.active {
+            background: #FFCC00;
+            color: #000;
+            box-shadow: 0 0 8px #FFFF00;
+        }
+
+        .size-button:hover {
+            background: #0000CC;
+            transform: scale(1.05);
+        }
+
+        .size-button.active:hover {
+            background: #FFFF00;
+        }
+
         @media (max-width: 768px) {
             .title { font-size: 20px; }
             .subtitle { font-size: 10px; }
@@ -226,6 +269,12 @@
 ●   ●●●C●●●   ●
 ●●●●●●●●●●●●●●●
         </div>
+    </div>
+
+    <div class="view-toggle">
+        <h4>🎮 GAME VIEW SIZE</h4>
+        <button class="size-button active" onclick="setGameSize('small')">SMALL (400×300)</button>
+        <button class="size-button" onclick="setGameSize('large')">LARGE (600×450)</button>
     </div>
 
     <div class="game-container">
@@ -280,13 +329,20 @@
     <script src="./dist/waiting-games.js"></script>
     <script>
         let pacmanGame;
+        let currentSize = 'small';
+        
+        const gameSizes = {
+            small: { width: 400, height: 300 },
+            large: { width: 600, height: 450 }
+        };
         
         function initGame() {
+            const size = gameSizes[currentSize];
             pacmanGame = WaitingGames.createGame('pacman', '#pacman-game', {
                 useKeyboard: true,
                 useMobile: true,
-                width: 400,
-                height: 300,
+                width: size.width,
+                height: size.height,
                 keys: {
                     UP: 'w',
                     DOWN: 's',
@@ -295,6 +351,24 @@
                 }
             });
             pacmanGame.start();
+        }
+        
+        function setGameSize(size) {
+            if (currentSize === size) return;
+            
+            currentSize = size;
+            
+            // Update button states
+            document.querySelectorAll('.size-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Restart game with new size
+            if (pacmanGame) {
+                pacmanGame.destroy();
+            }
+            initGame();
         }
         
         function restartGame() {
