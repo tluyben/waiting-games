@@ -353,10 +353,8 @@ class Pong extends GameEngine {
             this.gameState = 'playing';
             return;
         }
-        if (x < this.config.width / 2) {
-            this.leftPaddle.y = y - this.leftPaddle.height / 2;
-        }
-        else {
+        // Only allow touch control of right paddle (human player)
+        if (x > this.config.width / 2) {
             this.rightPaddle.y = y - this.rightPaddle.height / 2;
         }
         this.clampPaddles();
@@ -372,17 +370,22 @@ class Pong extends GameEngine {
     update() {
         if (this.gameState !== 'playing')
             return;
+        // AI for left paddle (computer player)
+        const leftPaddleCenter = this.leftPaddle.y + this.leftPaddle.height / 2;
+        const ballY = this.ball.y;
+        const aiSpeed = this.leftPaddle.speed * 0.8; // Slightly slower than human for fairness
+        if (ballY < leftPaddleCenter - 10) {
+            this.leftPaddle.y -= aiSpeed;
+        }
+        else if (ballY > leftPaddleCenter + 10) {
+            this.leftPaddle.y += aiSpeed;
+        }
+        // Human controls for right paddle
         if (this.config.useKeyboard) {
             if (this.isKeyPressed('UP', { key: Object.keys(this.keys).find(k => this.keys[k] && k === this.keyMap.UP) || '' }) || this.keys['w'] || this.keys['W']) {
-                this.leftPaddle.y -= this.leftPaddle.speed;
-            }
-            if (this.isKeyPressed('DOWN', { key: Object.keys(this.keys).find(k => this.keys[k] && k === this.keyMap.DOWN) || '' }) || this.keys['s'] || this.keys['S']) {
-                this.leftPaddle.y += this.leftPaddle.speed;
-            }
-            if (this.keys[this.keyMap.UP] || this.keys['i'] || this.keys['I']) {
                 this.rightPaddle.y -= this.rightPaddle.speed;
             }
-            if (this.keys[this.keyMap.DOWN] || this.keys['k'] || this.keys['K']) {
+            if (this.isKeyPressed('DOWN', { key: Object.keys(this.keys).find(k => this.keys[k] && k === this.keyMap.DOWN) || '' }) || this.keys['s'] || this.keys['S']) {
                 this.rightPaddle.y += this.rightPaddle.speed;
             }
         }
@@ -445,7 +448,7 @@ class Pong extends GameEngine {
             this.ctx.fillText('Press SPACE or tap to start', this.config.width / 2, this.config.height / 2 + 50);
             if (this.config.useKeyboard) {
                 this.ctx.font = '14px Arial';
-                this.ctx.fillText('Left: W/S or ↑/↓ | Right: I/K', this.config.width / 2, this.config.height / 2 + 80);
+                this.ctx.fillText('Use W/S or ↑/↓ to control right paddle', this.config.width / 2, this.config.height / 2 + 80);
             }
         }
         else if (this.gameState === 'paused') {
