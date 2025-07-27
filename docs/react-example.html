@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiting Games - React Examples</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
+        
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+        }
+        
+        .example-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .example-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .note {
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid rgba(255, 255, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .back-link {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Home</a>
+        
+        <div class="header">
+            <h1>⚛️ React Examples</h1>
+            <p>Examples of using Waiting Games with React components</p>
+        </div>
+        
+        <div class="note">
+            <strong>Note:</strong> These are code examples for React usage. To see the games in action, visit the 
+            <a href="all-games-demo.html" style="color: #ffff88;">All Games Demo</a> page.
+        </div>
+        
+        <div class="examples-grid">
+            <!-- Example 1: Simple Error Page -->
+            <div class="example-card">
+                <h2 class="example-title">1. Simple Error Page</h2>
+                <p>Basic integration with auto-starting game:</p>
+                <div class="code-block">
+import React from 'react';
+import { WaitingGame } from 'waiting-games';
+
+export function ErrorPage() {
+  return (
+    &lt;div style={{ 
+      textAlign: 'center', 
+      padding: '40px',
+      fontFamily: 'Arial, sans-serif'
+    }}&gt;
+      &lt;h1&gt;🚧 Oops! Something went wrong&lt;/h1&gt;
+      &lt;p&gt;Our team has been notified and is working on a fix.&lt;/p&gt;
+      &lt;p&gt;While you wait, enjoy a quick game of Snake!&lt;/p&gt;
+      
+      &lt;WaitingGame 
+        game="snake"
+        config={{
+          useKeyboard: true,
+          useMobile: true,
+          width: 400,
+          height: 300
+        }}
+        autoStart={true}
+        style={{ 
+          margin: '20px auto',
+          border: '2px solid #ddd',
+          borderRadius: '8px',
+          display: 'inline-block'
+        }}
+      /&gt;
+    &lt;/div&gt;
+  );
+}
+                </div>
+            </div>
+            
+            <!-- Example 2: Loading Page with Controls -->
+            <div class="example-card">
+                <h2 class="example-title">2. Loading Page with Controls</h2>
+                <p>Interactive configuration and manual controls:</p>
+                <div class="code-block">
+import React, { useState } from 'react';
+import { WaitingGame } from 'waiting-games';
+
+export function LoadingPage() {
+  const [gameConfig, setGameConfig] = useState({
+    useKeyboard: true,
+    useMobile: true,
+    width: 400,
+    height: 300,
+    theme: 'classic'
+  });
+
+  return (
+    &lt;div style={{ 
+      textAlign: 'center', 
+      padding: '40px',
+      fontFamily: 'Arial, sans-serif'
+    }}&gt;
+      &lt;h1&gt;⏳ Loading Your Data...&lt;/h1&gt;
+      
+      &lt;div style={{
+        background: '#f8f9fa',
+        padding: '20px',
+        borderRadius: '8px',
+        margin: '20px auto',
+        maxWidth: '600px'
+      }}&gt;
+        &lt;p&gt;This might take a minute. Want to play while you wait?&lt;/p&gt;
+        
+        &lt;div style={{ margin: '20px 0' }}&gt;
+          &lt;label style={{ marginRight: '20px' }}&gt;
+            &lt;input 
+              type="checkbox" 
+              checked={gameConfig.useKeyboard}
+              onChange={(e) =&gt; setGameConfig({
+                ...gameConfig, 
+                useKeyboard: e.target.checked
+              })}
+            /&gt;
+            Keyboard Controls
+          &lt;/label&gt;
+          
+          &lt;label&gt;
+            &lt;input 
+              type="checkbox" 
+              checked={gameConfig.useMobile}
+              onChange={(e) =&gt; setGameConfig({
+                ...gameConfig, 
+                useMobile: e.target.checked
+              })}
+            /&gt;
+            Touch Controls
+          &lt;/label&gt;
+        &lt;/div&gt;
+        
+        &lt;WaitingGame 
+          game="snake"
+          config={gameConfig}
+          autoStart={false}
+          style={{ 
+            margin: '20px auto',
+            border: '2px solid #007bff',
+            borderRadius: '8px',
+            display: 'inline-block'
+          }}
+        /&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+                </div>
+            </div>
+            
+            <!-- Example 3: Custom Key Mapping -->
+            <div class="example-card">
+                <h2 class="example-title">3. Custom Key Mapping</h2>
+                <p>Using custom keyboard controls:</p>
+                <div class="code-block">
+import React from 'react';
+import { WaitingGame } from 'waiting-games';
+
+export function CustomControlsDemo() {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Snake with WASD Controls&lt;/h2&gt;
+      &lt;WaitingGame 
+        game="snake"
+        config={{
+          useKeyboard: true,
+          useMobile: true,
+          keys: {
+            UP: 'w',
+            DOWN: 's',
+            LEFT: 'a',
+            RIGHT: 'd',
+            START: 'Enter'
+          }
+        }}
+        autoStart={true}
+      /&gt;
+      
+      &lt;h2&gt;Space Invaders with Custom Keys&lt;/h2&gt;
+      &lt;WaitingGame 
+        game="spaceinvaders"
+        config={{
+          useKeyboard: true,
+          keys: {
+            LEFT: 'j',
+            RIGHT: 'l',
+            FIRE: 'k'
+          }
+        }}
+        autoStart={true}
+      /&gt;
+    &lt;/div&gt;
+  );
+}
+                </div>
+            </div>
+            
+            <!-- Example 4: Multiple Games Selector -->
+            <div class="example-card">
+                <h2 class="example-title">4. Multiple Games Selector</h2>
+                <p>Game selection with different configurations:</p>
+                <div class="code-block">
+import React, { useState } from 'react';
+import { WaitingGame } from 'waiting-games';
+
+export function GameSelector() {
+  const [selectedGame, setSelectedGame] = useState('snake');
+  
+  const games = [
+    { id: 'snake', name: 'Snake', width: 400, height: 300 },
+    { id: 'pong', name: 'Pong', width: 400, height: 300 },
+    { id: 'tetris', name: 'Tetris', width: 240, height: 420 },
+    { id: 'pacman', name: 'Pac-Man', width: 392, height: 308 },
+    { id: 'asteroids', name: 'Asteroids', width: 400, height: 300 },
+    { id: 'frogger', name: 'Frogger', width: 416, height: 448 }
+  ];
+  
+  const currentGame = games.find(g =&gt; g.id === selectedGame);
+
+  return (
+    &lt;div style={{ textAlign: 'center', padding: '20px' }}&gt;
+      &lt;h1&gt;🎮 Game Selection&lt;/h1&gt;
+      
+      &lt;div style={{ margin: '20px 0' }}&gt;
+        &lt;label&gt;Choose a game: &lt;/label&gt;
+        &lt;select 
+          value={selectedGame}
+          onChange={(e) =&gt; setSelectedGame(e.target.value)}
+          style={{ padding: '8px', margin: '0 10px' }}
+        &gt;
+          {games.map(game =&gt; (
+            &lt;option key={game.id} value={game.id}&gt;
+              {game.name}
+            &lt;/option&gt;
+          ))}
+        &lt;/select&gt;
+      &lt;/div&gt;
+      
+      &lt;WaitingGame 
+        key={selectedGame} // Force re-render when game changes
+        game={selectedGame}
+        config={{
+          useKeyboard: true,
+          useMobile: true,
+          width: currentGame.width,
+          height: currentGame.height
+        }}
+        autoStart={true}
+        style={{
+          margin: '20px auto',
+          border: '2px solid #333',
+          borderRadius: '8px',
+          display: 'inline-block'
+        }}
+      /&gt;
+    &lt;/div&gt;
+  );
+}
+                </div>
+            </div>
+            
+            <!-- Example 5: Installation and Setup -->
+            <div class="example-card">
+                <h2 class="example-title">5. Installation & Setup</h2>
+                <p>How to install and use in your React project:</p>
+                <div class="code-block">
+# Install the package
+npm install waiting-games
+
+# In your React component
+import React from 'react';
+import { WaitingGame } from 'waiting-games';
+
+// TypeScript users can also import types
+import { GameConfig, GameType } from 'waiting-games';
+
+function App() {
+  return (
+    &lt;div&gt;
+      &lt;WaitingGame 
+        game="snake"
+        config={{
+          useKeyboard: true,
+          useMobile: true,
+          width: 400,
+          height: 300
+        }}
+        autoStart={true}
+      /&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default App;
+                </div>
+            </div>
+            
+            <!-- Example 6: Error Boundary Integration -->
+            <div class="example-card">
+                <h2 class="example-title">6. Error Boundary Integration</h2>
+                <p>Show games when your app crashes:</p>
+                <div class="code-block">
+import React from 'react';
+import { WaitingGame } from 'waiting-games';
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        &lt;div style={{
+          textAlign: 'center',
+          padding: '40px',
+          fontFamily: 'Arial, sans-serif'
+        }}&gt;
+          &lt;h1&gt;⚠️ Something went wrong&lt;/h1&gt;
+          &lt;p&gt;Don't worry, we're fixing it! Play a game while you wait:&lt;/p&gt;
+          
+          &lt;WaitingGame 
+            game="tetris"
+            config={{
+              useKeyboard: true,
+              useMobile: true,
+              width: 240,
+              height: 420
+            }}
+            autoStart={true}
+          /&gt;
+          
+          &lt;button 
+            onClick={() =&gt; window.location.reload()}
+            style={{
+              marginTop: '20px',
+              padding: '10px 20px',
+              fontSize: '16px'
+            }}
+          &gt;
+            Reload Page
+          &lt;/button&gt;
+        &lt;/div&gt;
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Usage
+function App() {
+  return (
+    &lt;ErrorBoundary&gt;
+      &lt;YourAppComponents /&gt;
+    &lt;/ErrorBoundary&gt;
+  );
+}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

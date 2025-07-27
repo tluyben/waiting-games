@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiting Games - Vanilla JS Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        
+        .error-page {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .game-container {
+            margin: 30px auto;
+            display: inline-block;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-page">
+        <h1>🚧 Page Under Maintenance</h1>
+        <p>We're working hard to get things back up and running.</p>
+        <p>While you wait, why not play some Snake?</p>
+        
+        <div class="instructions">
+            <h3>How to Play:</h3>
+            <ul>
+                <li><strong>Desktop:</strong> Use arrow keys or WASD to move</li>
+                <li><strong>Mobile:</strong> Tap in the direction you want to move</li>
+                <li><strong>Goal:</strong> Eat the red food and grow your snake</li>
+                <li><strong>Restart:</strong> Press Space or tap when game over</li>
+            </ul>
+        </div>
+        
+        <div class="game-container" id="snake-game"></div>
+        
+        <div class="controls">
+            <button onclick="startGame()">Start Game</button>
+            <button onclick="pauseGame()">Pause</button>
+            <button onclick="resumeGame()">Resume</button>
+            <button onclick="stopGame()">Stop</button>
+        </div>
+        
+        <p><small>Game will automatically start when page loads</small></p>
+    </div>
+
+    <!-- Include the waiting-games library -->
+    <script src="../dist/waiting-games.js"></script>
+    
+    <script>
+        let game;
+        
+        // Initialize the game when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            game = WaitingGames.createGame('snake', '#snake-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300,
+                theme: 'classic'
+            });
+            
+            // Auto-start the game
+            game.start();
+        });
+        
+        function startGame() {
+            if (game) game.start();
+        }
+        
+        function pauseGame() {
+            if (game) game.pause();
+        }
+        
+        function resumeGame() {
+            if (game) game.resume();
+        }
+        
+        function stopGame() {
+            if (game) game.stop();
+        }
+        
+        // Prevent scrolling on mobile when touching the game area
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('#snake-game')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>

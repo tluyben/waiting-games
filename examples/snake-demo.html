@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐍 Snake Game - Retro Demo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', monospace;
+            background: linear-gradient(45deg, #1a1a1a, #2d5016);
+            color: #00ff00;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00ff00;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00ff00; }
+            to { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #88ff88;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #00ff00;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+        }
+
+        .controls {
+            background: rgba(0, 50, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #00aa00;
+            max-width: 600px;
+        }
+
+        .controls h3 {
+            color: #00ff00;
+            margin-top: 0;
+            font-size: 14px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-item {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #00ff00;
+        }
+
+        .key {
+            background: #00aa00;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin: 0 2px;
+        }
+
+        .snake-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .food-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ff0000;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.7; }
+        }
+
+        .ascii-art {
+            color: #00aa00;
+            font-size: 8px;
+            line-height: 1;
+            margin: 20px 0;
+            text-align: center;
+            white-space: pre;
+        }
+
+        .game-info {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #00aa00;
+            max-width: 600px;
+        }
+
+        .retro-button {
+            background: #00aa00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+
+        .retro-button:hover {
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 20px; }
+            .subtitle { font-size: 10px; }
+            .control-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="snake-pattern">
+        <div class="food-dot" style="top: 20%; left: 10%;"></div>
+        <div class="food-dot" style="top: 60%; left: 80%;"></div>
+        <div class="food-dot" style="top: 80%; left: 30%;"></div>
+    </div>
+
+    <div class="header">
+        <h1 class="title">🐍 SNAKE GAME</h1>
+        <p class="subtitle">Classic Nokia-style snake action - Eat, Grow, Survive!</p>
+        
+        <div class="ascii-art">
+    ████████
+  ██      ██
+██  ████  ██
+██        ██
+  ████████
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div id="snake-game"></div>
+    </div>
+
+    <div class="controls">
+        <h3>🎮 GAME CONTROLS</h3>
+        <div class="control-grid">
+            <div class="control-item">
+                <strong>Movement:</strong><br>
+                <span class="key">WASD</span> or <span class="key">Arrow Keys</span>
+            </div>
+            <div class="control-item">
+                <strong>Restart:</strong><br>
+                <span class="key">SPACE</span> when game over
+            </div>
+            <div class="control-item">
+                <strong>Mobile:</strong><br>
+                Tap direction to move snake
+            </div>
+            <div class="control-item">
+                <strong>Goal:</strong><br>
+                Eat red food, grow longer, avoid walls & self!
+            </div>
+        </div>
+    </div>
+
+    <div class="game-info">
+        <h3>🐍 ABOUT SNAKE</h3>
+        <p>One of the most iconic games ever created! Guide your snake to eat food and grow longer. 
+        The challenge increases as your snake gets bigger and harder to maneuver. This version features 
+        classic gameplay with modern controls and mobile support.</p>
+        
+        <p><strong>Features:</strong></p>
+        <ul>
+            <li>Classic snake physics</li>
+            <li>Progressive difficulty</li>
+            <li>Score tracking</li>
+            <li>Mobile touch controls</li>
+            <li>Custom key mapping support</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin: 20px;">
+        <button class="retro-button" onclick="restartGame()">🔄 RESTART GAME</button>
+        <button class="retro-button" onclick="togglePause()">⏸️ PAUSE/RESUME</button>
+        <a href="all-games-demo.html" class="retro-button" style="text-decoration: none;">🎮 ALL GAMES</a>
+    </div>
+
+    <script src="../dist/waiting-games.js"></script>
+    <script>
+        let snakeGame;
+        
+        function initGame() {
+            snakeGame = WaitingGames.createGame('snake', '#snake-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300,
+                keys: {
+                    UP: 'w',
+                    DOWN: 's', 
+                    LEFT: 'a',
+                    RIGHT: 'd'
+                }
+            });
+            snakeGame.start();
+        }
+        
+        function restartGame() {
+            if (snakeGame) {
+                snakeGame.destroy();
+            }
+            initGame();
+        }
+        
+        function togglePause() {
+            if (snakeGame) {
+                // Snake doesn't have pause, so restart instead
+                restartGame();
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+        
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('#snake-game')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>

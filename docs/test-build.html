@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Built Package</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .game-container {
+            margin: 20px auto;
+            display: inline-block;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Testing Built Package</h1>
+    <p>This tests that the built waiting-games.js file works correctly</p>
+    
+    <div>
+        <select id="gameSelect">
+            <option value="snake">Snake</option>
+            <option value="pong">Pong</option>
+            <option value="breakout">Breakout</option>
+            <option value="spaceinvaders">Space Invaders</option>
+            <option value="tetris">Tetris</option>
+            <option value="pacman">Pac-Man</option>
+            <option value="asteroids">Asteroids</option>
+            <option value="frogger">Frogger</option>
+        </select>
+        <button onclick="changeGame()">Change Game</button>
+    </div>
+    
+    <div class="game-container" id="game-container"></div>
+    
+    <div>
+        <button onclick="startGame()">Start</button>
+        <button onclick="pauseGame()">Pause</button>
+        <button onclick="resumeGame()">Resume</button>
+        <button onclick="stopGame()">Stop</button>
+    </div>
+
+    <!-- Include the built library -->
+    <script src="dist/waiting-games.js"></script>
+    
+    <script>
+        let currentGame = null;
+        
+        function createGameInstance() {
+            if (currentGame) {
+                currentGame.destroy();
+            }
+            
+            const gameType = document.getElementById('gameSelect').value;
+            const container = document.getElementById('game-container');
+            container.innerHTML = ''; // Clear previous game
+            
+            const config = {
+                useKeyboard: true,
+                useMobile: true,
+                width: gameType === 'tetris' ? 240 : 
+                       gameType === 'pacman' ? 392 :
+                       gameType === 'frogger' ? 416 : 400,
+                height: gameType === 'tetris' ? 420 :
+                        gameType === 'pacman' ? 308 :
+                        gameType === 'frogger' ? 448 : 300
+            };
+            
+            // Add custom keys for snake as demo
+            if (gameType === 'snake') {
+                config.keys = {
+                    UP: 'w',
+                    DOWN: 's', 
+                    LEFT: 'a',
+                    RIGHT: 'd'
+                };
+            }
+            
+            currentGame = WaitingGames.createGame(gameType, container, config);
+            currentGame.start();
+        }
+        
+        function changeGame() {
+            createGameInstance();
+        }
+        
+        function startGame() {
+            if (currentGame) currentGame.start();
+        }
+        
+        function pauseGame() {
+            if (currentGame) currentGame.pause();
+        }
+        
+        function resumeGame() {
+            if (currentGame) currentGame.resume();
+        }
+        
+        function stopGame() {
+            if (currentGame) currentGame.stop();
+        }
+        
+        // Initialize with Snake
+        window.addEventListener('DOMContentLoaded', function() {
+            createGameInstance();
+        });
+        
+        // Prevent scrolling when touching games
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('#game-container')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>

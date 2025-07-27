@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎪 Circus Atari - Carnival Performance Demo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', monospace;
+            background: linear-gradient(180deg, #FF1493 0%, #FFB6C1 30%, #FF69B4 70%, #DC143C 100%);
+            color: #FFFF00;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .circus-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+            background-image: 
+                repeating-conic-gradient(
+                    from 0deg at 50% 50%,
+                    #FF1493 0deg,
+                    #FFB6C1 36deg,
+                    #FF69B4 72deg,
+                    #DC143C 108deg,
+                    #FF1493 144deg
+                ),
+                radial-gradient(circle at 25% 25%, #FFFF00 3px, transparent 4px),
+                radial-gradient(circle at 75% 75%, #FFFF00 3px, transparent 4px);
+            background-size: 100px 100px, 50px 50px, 50px 50px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(220, 20, 60, 0.9);
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(255, 255, 0, 0.3);
+        }
+
+        .title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #FFFF00;
+            animation: carnival 2s ease-in-out infinite;
+        }
+
+        @keyframes carnival {
+            0%, 100% { 
+                color: #FFFF00; 
+                text-shadow: 0 0 10px #FFFF00; 
+            }
+            25% { 
+                color: #FF69B4; 
+                text-shadow: 0 0 15px #FF69B4; 
+            }
+            50% { 
+                color: #00FFFF; 
+                text-shadow: 0 0 20px #00FFFF; 
+            }
+            75% { 
+                color: #FF1493; 
+                text-shadow: 0 0 15px #FF1493; 
+            }
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #FFB6C1;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(220, 20, 60, 0.9);
+            border: 3px solid #FFFF00;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.5);
+        }
+
+        .controls {
+            background: rgba(255, 20, 147, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #FFB6C1;
+            max-width: 600px;
+        }
+
+        .controls h3 {
+            color: #FFFF00;
+            margin-top: 0;
+            font-size: 14px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-item {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #FFFF00;
+            color: #FFB6C1;
+        }
+
+        .key {
+            background: #FFB6C1;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin: 0 2px;
+        }
+
+        .circus-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .balloon {
+            position: absolute;
+            font-size: 16px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(-2deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+
+        .seesaw {
+            position: absolute;
+            width: 40px;
+            height: 4px;
+            background: #8B4513;
+            border-radius: 2px;
+            bottom: 25%;
+            animation: tilt 2s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        @keyframes tilt {
+            0%, 100% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+        }
+
+        .performer {
+            position: absolute;
+            font-size: 12px;
+            animation: jump 1.5s ease-in-out infinite;
+        }
+
+        @keyframes jump {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-30px); }
+        }
+
+        .tent-stripe {
+            position: absolute;
+            width: 60px;
+            height: 8px;
+            background: repeating-linear-gradient(
+                90deg,
+                #DC143C,
+                #DC143C 10px,
+                #FFFF00 10px,
+                #FFFF00 20px
+            );
+            animation: wave 2s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        .ascii-art {
+            color: #FFB6C1;
+            font-size: 8px;
+            line-height: 1;
+            margin: 20px 0;
+            text-align: center;
+            white-space: pre;
+        }
+
+        .game-info {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #FFB6C1;
+            max-width: 600px;
+            color: #FFB6C1;
+        }
+
+        .retro-button {
+            background: #FFB6C1;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+
+        .retro-button:hover {
+            background: #FFFF00;
+            box-shadow: 0 0 10px #FFFF00;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 20px; }
+            .subtitle { font-size: 10px; }
+            .control-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="circus-pattern"></div>
+    
+    <div class="circus-elements">
+        <div class="balloon" style="top: 15%; left: 20%;">🎈</div>
+        <div class="balloon" style="top: 25%; left: 70%; animation-delay: 1s;">🎈</div>
+        <div class="balloon" style="top: 35%; right: 25%; animation-delay: 2s;">🎈</div>
+        <div class="seesaw" style="left: 40%;"></div>
+        <div class="performer" style="bottom: 30%; left: 35%;">🤹</div>
+        <div class="performer" style="bottom: 30%; right: 35%; animation-delay: 0.8s;">🎭</div>
+        <div class="tent-stripe" style="top: 10%; left: 15%;"></div>
+        <div class="tent-stripe" style="top: 15%; right: 15%; animation-delay: 1s;"></div>
+    </div>
+
+    <div class="header">
+        <h1 class="title">🎪 CIRCUS ATARI</h1>
+        <p class="subtitle">Pop balloons and perform amazing circus feats!</p>
+        
+        <div class="ascii-art">
+    🎈🎈🎈
+  /───────\
+ 🤹  ⚖️  🎭
+  \─────/
+    🎪
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div id="circusatari-game"></div>
+    </div>
+
+    <div class="controls">
+        <h3>🎮 GAME CONTROLS</h3>
+        <div class="control-grid">
+            <div class="control-item">
+                <strong>Movement:</strong><br>
+                <span class="key">A/D</span> to move seesaw
+            </div>
+            <div class="control-item">
+                <strong>Launch:</strong><br>
+                <span class="key">Space</span> to launch performer
+            </div>
+            <div class="control-item">
+                <strong>Mobile:</strong><br>
+                Swipe to move, tap to launch
+            </div>
+            <div class="control-item">
+                <strong>Goal:</strong><br>
+                Pop all the balloons!
+            </div>
+        </div>
+    </div>
+
+    <div class="game-info">
+        <h3>🎪 ABOUT CIRCUS ATARI</h3>
+        <p>Welcome to the big top! Help your circus performers bounce off the seesaw 
+        to pop balloons floating high above. Time your launches perfectly and position 
+        the seesaw to reach all the balloons in this colorful carnival adventure!</p>
+        
+        <p><strong>Features:</strong></p>
+        <ul>
+            <li>Physics-based seesaw mechanics</li>
+            <li>Balloon popping challenges</li>
+            <li>Multiple circus performer characters</li>
+            <li>Increasingly difficult balloon patterns</li>
+            <li>Colorful carnival atmosphere</li>
+            <li>Classic Atari 2600 gameplay</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin: 20px;">
+        <button class="retro-button" onclick="restartGame()">🔄 RESTART GAME</button>
+        <button class="retro-button" onclick="togglePause()">⏸️ PAUSE/RESUME</button>
+        <a href="all-games-demo.html" class="retro-button" style="text-decoration: none;">🎮 ALL GAMES</a>
+    </div>
+
+    <script src="../dist/waiting-games.js"></script>
+    <script>
+        let circusatariGame;
+        
+        function initGame() {
+            circusatariGame = WaitingGames.createGame('circusatari', '#circusatari-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300,
+                keys: {
+                    LEFT: 'a',
+                    RIGHT: 'd',
+                    ACTION: ' '
+                }
+            });
+            circusatariGame.start();
+        }
+        
+        function restartGame() {
+            if (circusatariGame) {
+                circusatariGame.destroy();
+            }
+            initGame();
+        }
+        
+        function togglePause() {
+            if (circusatariGame) {
+                restartGame();
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+        
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('#circusatari-game')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>

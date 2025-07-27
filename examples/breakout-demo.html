@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧱 Breakout Game - Retro Demo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', monospace;
+            background: linear-gradient(45deg, #FF6B35, #FF8E53, #FFB347);
+            color: #FFFFFF;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .brick-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+            background-image: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 20px,
+                    #FFFFFF 20px,
+                    #FFFFFF 22px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 40px,
+                    #FFFFFF 40px,
+                    #FFFFFF 42px
+                );
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #FF6B35;
+            animation: brickGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes brickGlow {
+            from { text-shadow: 0 0 10px #FF6B35; }
+            to { text-shadow: 0 0 20px #FF6B35, 0 0 30px #FFB347; }
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #FFB347;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #FF6B35;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 107, 53, 0.5);
+        }
+
+        .controls {
+            background: rgba(139, 69, 19, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #FF6B35;
+            max-width: 600px;
+        }
+
+        .controls h3 {
+            color: #FFB347;
+            margin-top: 0;
+            font-size: 14px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-item {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #FF6B35;
+        }
+
+        .key {
+            background: #FF6B35;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin: 0 2px;
+        }
+
+        .floating-bricks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.2;
+        }
+
+        .floating-brick {
+            position: absolute;
+            width: 30px;
+            height: 15px;
+            border-radius: 3px;
+            animation: floatBrick 4s ease-in-out infinite;
+        }
+
+        @keyframes floatBrick {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .ascii-art {
+            color: #FFB347;
+            font-size: 8px;
+            line-height: 1;
+            margin: 20px 0;
+            text-align: center;
+            white-space: pre;
+        }
+
+        .game-info {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #FF6B35;
+            max-width: 600px;
+        }
+
+        .retro-button {
+            background: #FF6B35;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+
+        .retro-button:hover {
+            background: #FFB347;
+            box-shadow: 0 0 10px #FF6B35;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 20px; }
+            .subtitle { font-size: 10px; }
+            .control-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="brick-pattern"></div>
+    
+    <div class="floating-bricks">
+        <div class="floating-brick" style="top: 20%; left: 10%; background: #FF0000;"></div>
+        <div class="floating-brick" style="top: 40%; left: 80%; background: #00FF00; animation-delay: 1s;"></div>
+        <div class="floating-brick" style="top: 70%; left: 30%; background: #0000FF; animation-delay: 2s;"></div>
+        <div class="floating-brick" style="top: 30%; left: 60%; background: #FFFF00; animation-delay: 1.5s;"></div>
+    </div>
+
+    <div class="header">
+        <h1 class="title">🧱 BREAKOUT</h1>
+        <p class="subtitle">Smash through the wall, one brick at a time!</p>
+        
+        <div class="ascii-art">
+████████████
+████████████
+████████████
+     ●
+    ▬▬▬
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div id="breakout-game"></div>
+    </div>
+
+    <div class="controls">
+        <h3>🎮 GAME CONTROLS</h3>
+        <div class="control-grid">
+            <div class="control-item">
+                <strong>Movement:</strong><br>
+                <span class="key">A</span> / <span class="key">D</span> or <span class="key">Left</span> / <span class="key">Right</span>
+            </div>
+            <div class="control-item">
+                <strong>Launch Ball:</strong><br>
+                <span class="key">SPACE</span> to start
+            </div>
+            <div class="control-item">
+                <strong>Mobile:</strong><br>
+                Tap left/right side to move paddle
+            </div>
+            <div class="control-item">
+                <strong>Goal:</strong><br>
+                Destroy all bricks without losing ball!
+            </div>
+        </div>
+    </div>
+
+    <div class="game-info">
+        <h3>🧱 ABOUT BREAKOUT</h3>
+        <p>The legendary brick-breaking game that made Atari famous! Use your paddle to bounce the ball 
+        and destroy the colorful wall of bricks. Each brick destroyed earns points, but don't let the ball 
+        fall off the bottom! This version features authentic physics and progressive difficulty.</p>
+        
+        <p><strong>Features:</strong></p>
+        <ul>
+            <li>Classic brick-breaking gameplay</li>
+            <li>Multiple colored brick types</li>
+            <li>Realistic ball physics</li>
+            <li>Progressive difficulty levels</li>
+            <li>Score tracking and lives system</li>
+            <li>Mobile touch controls</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin: 20px;">
+        <button class="retro-button" onclick="restartGame()">🔄 RESTART GAME</button>
+        <button class="retro-button" onclick="togglePause()">⏸️ PAUSE/RESUME</button>
+        <a href="all-games-demo.html" class="retro-button" style="text-decoration: none;">🎮 ALL GAMES</a>
+    </div>
+
+    <script src="../dist/waiting-games.js"></script>
+    <script>
+        let breakoutGame;
+        
+        function initGame() {
+            breakoutGame = WaitingGames.createGame('breakout', '#breakout-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300,
+                keys: {
+                    LEFT: 'a',
+                    RIGHT: 'd'
+                }
+            });
+            breakoutGame.start();
+        }
+        
+        function restartGame() {
+            if (breakoutGame) {
+                breakoutGame.destroy();
+            }
+            initGame();
+        }
+        
+        function togglePause() {
+            if (breakoutGame) {
+                // Breakout doesn't have pause, so restart instead
+                restartGame();
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+        
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('#breakout-game')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>

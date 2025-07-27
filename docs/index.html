@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕹️ Waiting Games - Retro Games Library</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 0;
+        }
+        
+        .header h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 50px 0;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+        
+        .feature h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        
+        .demo-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 50px 0;
+        }
+        
+        .demo-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .demo-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .demo-btn.primary {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .installation {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 50px 0;
+        }
+        
+        .installation h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 50px 0;
+        }
+        
+        .game-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .game-card h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .game-card p {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            padding: 40px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .github-link {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .github-link:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .demo-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .demo-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕹️ Waiting Games</h1>
+            <p>Retro games for error pages and waiting screens. Add engaging mini-games to keep users entertained while they wait.</p>
+        </div>
+        
+        <div class="demo-buttons">
+            <a href="all-games-demo.html" class="demo-btn primary">🎮 Play All Games</a>
+            <a href="test-build.html" class="demo-btn">🔧 Test Build</a>
+            <a href="react-example.html" class="demo-btn">⚛️ React Examples</a>
+            <a href="vanilla-demo.html" class="demo-btn">📜 Vanilla JS Demo</a>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🚀 Easy Integration</h3>
+                <p>Install via NPM or use CDN. Works with vanilla JavaScript, React, and any web framework.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>📱 Mobile Ready</h3>
+                <p>Touch controls for all games. Responsive design that works on desktop and mobile devices.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>⌨️ Custom Controls</h3>
+                <p>Customize keyboard mappings. Support for WASD, arrow keys, or any custom key configuration.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>🎯 Zero Dependencies</h3>
+                <p>Pure JavaScript with no external dependencies. Small bundle size and fast loading.</p>
+            </div>
+        </div>
+        
+        <div class="games-grid">
+            <div class="game-card">
+                <h3>🐍 Snake (1970s)</h3>
+                <p>Classic growing snake game</p>
+            </div>
+            
+            <div class="game-card">
+                <h3>🏓 Pong (1972)</h3>
+                <p>The first video game ever</p>
+            </div>
+            
+            <div class="game-card">
+                <h3>🧱 Breakout (1976)</h3>
+                <p>Bounce ball to break bricks</p>
+            </div>
+            
+            <div class="game-card">
+                <h3>👾 Space Invaders (1978)</h3>
+                <p>Defend against alien invasion</p>
+            </div>
+            
+            <div class="game-card">
+                <h3>☄️ Asteroids (1979)</h3>
+                <p>Rotate, thrust, shoot rocks</p>
+            </div>
+            
+            <div class="game-card">
+                <h3>👻 Pac-Man (1980)</h3>
+                <p>Navigate mazes, eat dots</p>
+            </div>
+            
+            <div class="game-card">
+                <h3>🐸 Frogger (1981)</h3>
+                <p>Cross roads and rivers safely</p>
+            </div>
+            
+            <div class="game-card">
+                <h3>🧩 Tetris (1984)</h3>
+                <p>Falling blocks puzzle game</p>
+            </div>
+        </div>
+        
+        <div class="installation">
+            <h2>📦 Installation</h2>
+            
+            <h3>NPM</h3>
+            <div class="code-block">
+npm install waiting-games
+            </div>
+            
+            <h3>CDN</h3>
+            <div class="code-block">
+&lt;script src="https://unpkg.com/waiting-games@latest/dist/waiting-games.js"&gt;&lt;/script&gt;
+            </div>
+            
+            <h3>Usage</h3>
+            <div class="code-block">
+// Vanilla JavaScript
+const game = WaitingGames.createGame('snake', '#container', {
+  useKeyboard: true,
+  useMobile: true,
+  keys: { UP: 'w', DOWN: 's', LEFT: 'a', RIGHT: 'd' }
+});
+game.start();
+
+// React
+&lt;WaitingGame game="tetris" config={{ useMobile: true }} autoStart={true} /&gt;
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Made with ❤️ for better user experiences during waiting times</p>
+            <p><a href="https://github.com/yourusername/waiting-games" class="github-link">View on GitHub</a></p>
+        </div>
+    </div>
+</body>
+</html>

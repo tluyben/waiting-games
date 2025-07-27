@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐸 Frogger Game - River Crossing Demo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', monospace;
+            background: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #228B22 100%);
+            color: #00FF00;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .water-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.15;
+            background-image: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 20px,
+                    #0066CC 20px,
+                    #0066CC 22px
+                ),
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 30px,
+                    #228B22 30px,
+                    #228B22 32px
+                );
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 100, 0, 0.9);
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00FF00;
+            animation: ripple 2s ease-in-out infinite;
+        }
+
+        @keyframes ripple {
+            0%, 100% { text-shadow: 0 0 10px #00FF00; }
+            50% { text-shadow: 0 0 20px #00FF00, 0 0 30px #32CD32; }
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #90EE90;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(34, 139, 34, 0.9);
+            border: 3px solid #00FF00;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+        }
+
+        .controls {
+            background: rgba(0, 80, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #90EE90;
+            max-width: 600px;
+        }
+
+        .controls h3 {
+            color: #00FF00;
+            margin-top: 0;
+            font-size: 14px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-item {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #00FF00;
+        }
+
+        .key {
+            background: #90EE90;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin: 0 2px;
+        }
+
+        .floating-lilypads {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .lilypad {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #228B22;
+            border-radius: 50% 50% 50% 0;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        .log {
+            position: absolute;
+            width: 40px;
+            height: 8px;
+            background: #8B4513;
+            border-radius: 4px;
+            animation: drift 4s linear infinite;
+        }
+
+        @keyframes drift {
+            from { transform: translateX(-50px); }
+            to { transform: translateX(calc(100vw + 50px)); }
+        }
+
+        .ascii-art {
+            color: #90EE90;
+            font-size: 8px;
+            line-height: 1;
+            margin: 20px 0;
+            text-align: center;
+            white-space: pre;
+        }
+
+        .game-info {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #90EE90;
+            max-width: 600px;
+        }
+
+        .retro-button {
+            background: #90EE90;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+
+        .retro-button:hover {
+            background: #00FF00;
+            box-shadow: 0 0 10px #00FF00;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 20px; }
+            .subtitle { font-size: 10px; }
+            .control-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="water-pattern"></div>
+    
+    <div class="floating-lilypads">
+        <div class="lilypad" style="top: 20%; left: 15%;"></div>
+        <div class="lilypad" style="top: 40%; left: 25%; animation-delay: 0.8s;"></div>
+        <div class="lilypad" style="top: 60%; left: 35%; animation-delay: 1.6s;"></div>
+        <div class="lilypad" style="top: 80%; left: 45%; animation-delay: 2.4s;"></div>
+        <div class="log" style="top: 30%; animation-delay: 0s;"></div>
+        <div class="log" style="top: 50%; animation-delay: 2s;"></div>
+        <div class="log" style="top: 70%; animation-delay: 1s;"></div>
+    </div>
+
+    <div class="header">
+        <h1 class="title">🐸 FROGGER</h1>
+        <p class="subtitle">Hop across the busy road and river!</p>
+        
+        <div class="ascii-art">
+🐸🚗🚙🚚🚗🚙🚚🐸
+~~~~~~[LOG]~~~~~~
+~~🐢~~[LOG]~~🐢~~
+~~~~~~[LOG]~~~~~~
+🐸🚗🚙🚚🚗🚙🚚🐸
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div id="frogger-game"></div>
+    </div>
+
+    <div class="controls">
+        <h3>🎮 GAME CONTROLS</h3>
+        <div class="control-grid">
+            <div class="control-item">
+                <strong>Movement:</strong><br>
+                <span class="key">WASD</span> or <span class="key">Arrow Keys</span>
+            </div>
+            <div class="control-item">
+                <strong>Strategy:</strong><br>
+                Time your moves carefully!
+            </div>
+            <div class="control-item">
+                <strong>Mobile:</strong><br>
+                Tap in direction to hop
+            </div>
+            <div class="control-item">
+                <strong>Goal:</strong><br>
+                Get all frogs safely across!
+            </div>
+        </div>
+    </div>
+
+    <div class="game-info">
+        <h3>🐸 ABOUT FROGGER</h3>
+        <p>Help Frogger navigate through traffic and across the river to reach safety! 
+        This classic arcade game tests your timing and reflexes as you dodge cars, 
+        trucks, and leap onto logs and turtles to cross the water.</p>
+        
+        <p><strong>Features:</strong></p>
+        <ul>
+            <li>Classic road and river crossing gameplay</li>
+            <li>Multiple lanes of traffic</li>
+            <li>Moving logs and turtles in water</li>
+            <li>Time pressure mechanics</li>
+            <li>Progressive difficulty levels</li>
+            <li>Authentic arcade sound effects</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin: 20px;">
+        <button class="retro-button" onclick="restartGame()">🔄 RESTART GAME</button>
+        <button class="retro-button" onclick="togglePause()">⏸️ PAUSE/RESUME</button>
+        <a href="all-games-demo.html" class="retro-button" style="text-decoration: none;">🎮 ALL GAMES</a>
+    </div>
+
+    <script src="../dist/waiting-games.js"></script>
+    <script>
+        let froggerGame;
+        
+        function initGame() {
+            froggerGame = WaitingGames.createGame('frogger', '#frogger-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300,
+                keys: {
+                    UP: 'w',
+                    DOWN: 's',
+                    LEFT: 'a',
+                    RIGHT: 'd'
+                }
+            });
+            froggerGame.start();
+        }
+        
+        function restartGame() {
+            if (froggerGame) {
+                froggerGame.destroy();
+            }
+            initGame();
+        }
+        
+        function togglePause() {
+            if (froggerGame) {
+                restartGame();
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+        
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('#frogger-game')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+{
+  "name": "waiting-games",
+  "version": "1.0.0",
+  "description": "Retro games for error pages and waiting screens",
+  "main": "dist/waiting-games.js",
+  "module": "dist/waiting-games.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "jest",
+    "clean": "rm -rf dist/",
+    "prepublishOnly": "npm run clean && npm run build",
+    "publish:patch": "npm version patch && npm publish",
+    "publish:minor": "npm version minor && npm publish",
+    "publish:major": "npm version major && npm publish"
+  },
+  "keywords": [
+    "games",
+    "retro",
+    "arcade",
+    "classic",
+    "error-page",
+    "waiting",
+    "entertainment",
+    "snake",
+    "pong", 
+    "tetris",
+    "pacman",
+    "spaceinvaders",
+    "asteroids",
+    "breakout",
+    "frogger",
+    "donkeykong",
+    "qbert",
+    "kaboom",
+    "adventure",
+    "missilecommand",
+    "joust",
+    "lunarlander",
+    "battlezone",
+    "berzerk",
+    "circusatari",
+    "elevatoraction",
+    "digdug",
+    "1970s",
+    "1980s",
+    "javascript",
+    "typescript",
+    "react",
+    "canvas",
+    "mobile"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/react": "^18.0.0",
+    "jest": "^29.0.0",
+    "rollup": "^4.0.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
+}

@@ -1,0 +1,21 @@
+# Source files
+src/
+examples/
+docs/
+
+# Build configuration
+rollup.config.js
+tsconfig.json
+jest.config.js
+
+# Development files
+.git/
+.gitignore
+node_modules/
+*.log
+
+# Only include compiled distribution
+!dist/
+!README.md
+!LICENSE
+!package.json

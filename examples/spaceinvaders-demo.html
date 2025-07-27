@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👾 Space Invaders - Retro Demo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', monospace;
+            background: linear-gradient(to bottom, #000000, #1a0033, #000000);
+            color: #00FF00;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00FF00;
+            animation: alienGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes alienGlow {
+            from { text-shadow: 0 0 10px #00FF00; }
+            to { text-shadow: 0 0 20px #00FF00, 0 0 30px #00FF00; }
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #88FF88;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #00FF00;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+        }
+
+        .controls {
+            background: rgba(0, 20, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #00AA00;
+            max-width: 600px;
+        }
+
+        .controls h3 {
+            color: #00FF00;
+            margin-top: 0;
+            font-size: 14px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-item {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #00FF00;
+        }
+
+        .key {
+            background: #00AA00;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin: 0 2px;
+        }
+
+        .invader-formation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .mini-invader {
+            position: absolute;
+            color: #00FF00;
+            font-size: 12px;
+            animation: marchDown 8s linear infinite;
+        }
+
+        @keyframes marchDown {
+            0% { transform: translateY(-50px); }
+            100% { transform: translateY(100vh); }
+        }
+
+        .ascii-art {
+            color: #88FF88;
+            font-size: 8px;
+            line-height: 1;
+            margin: 20px 0;
+            text-align: center;
+            white-space: pre;
+        }
+
+        .game-info {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #00AA00;
+            max-width: 600px;
+        }
+
+        .retro-button {
+            background: #00AA00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+
+        .retro-button:hover {
+            background: #00FF00;
+            box-shadow: 0 0 10px #00FF00;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 20px; }
+            .subtitle { font-size: 10px; }
+            .control-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars">
+        <div class="star" style="top: 10%; left: 20%; animation-delay: 0s;"></div>
+        <div class="star" style="top: 30%; left: 70%; animation-delay: 1s;"></div>
+        <div class="star" style="top: 60%; left: 15%; animation-delay: 2s;"></div>
+        <div class="star" style="top: 80%; left: 90%; animation-delay: 0.5s;"></div>
+        <div class="star" style="top: 20%; left: 50%; animation-delay: 1.5s;"></div>
+    </div>
+    
+    <div class="invader-formation">
+        <div class="mini-invader" style="left: 10%; animation-delay: 0s;">👾</div>
+        <div class="mini-invader" style="left: 30%; animation-delay: 2s;">👾</div>
+        <div class="mini-invader" style="left: 50%; animation-delay: 4s;">👾</div>
+        <div class="mini-invader" style="left: 70%; animation-delay: 1s;">👾</div>
+        <div class="mini-invader" style="left: 90%; animation-delay: 3s;">👾</div>
+    </div>
+
+    <div class="header">
+        <h1 class="title">👾 SPACE INVADERS</h1>
+        <p class="subtitle">Defend Earth from the alien invasion!</p>
+        
+        <div class="ascii-art">
+  ▄▀█ ▄▀█ ▄▀█ ▄▀█ ▄▀█
+ ▄▀▄█▀▄▀▄█▀▄▀▄█▀▄▀▄█▀▄▀
+ ▀▄▄▄█▄▄▄█▄▄▄█▄▄▄█▄▄▄▀
+     ║       ║
+     ▲       ▲
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div id="spaceinvaders-game"></div>
+    </div>
+
+    <div class="controls">
+        <h3>🎮 GAME CONTROLS</h3>
+        <div class="control-grid">
+            <div class="control-item">
+                <strong>Movement:</strong><br>
+                <span class="key">A</span> / <span class="key">D</span> or <span class="key">Left</span> / <span class="key">Right</span>
+            </div>
+            <div class="control-item">
+                <strong>Fire:</strong><br>
+                <span class="key">SPACE</span> to shoot laser
+            </div>
+            <div class="control-item">
+                <strong>Mobile:</strong><br>
+                Tap left/right to move, tap to shoot
+            </div>
+            <div class="control-item">
+                <strong>Goal:</strong><br>
+                Destroy all invaders before they land!
+            </div>
+        </div>
+    </div>
+
+    <div class="game-info">
+        <h3>👾 ABOUT SPACE INVADERS</h3>
+        <p>The iconic 1978 arcade game that defined the shoot-'em-up genre! Command your laser cannon 
+        to defend Earth against waves of descending alien invaders. As you destroy the aliens, they 
+        move faster and become more aggressive. Use the defense barriers strategically!</p>
+        
+        <p><strong>Features:</strong></p>
+        <ul>
+            <li>Classic alien invasion gameplay</li>
+            <li>Progressive difficulty waves</li>
+            <li>Destructible defense barriers</li>
+            <li>UFO bonus targets</li>
+            <li>Authentic retro sound effects</li>
+            <li>High score tracking</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin: 20px;">
+        <button class="retro-button" onclick="restartGame()">🔄 RESTART GAME</button>
+        <button class="retro-button" onclick="togglePause()">⏸️ PAUSE/RESUME</button>
+        <a href="all-games-demo.html" class="retro-button" style="text-decoration: none;">🎮 ALL GAMES</a>
+    </div>
+
+    <script src="../dist/waiting-games.js"></script>
+    <script>
+        let spaceInvadersGame;
+        
+        function initGame() {
+            spaceInvadersGame = WaitingGames.createGame('spaceinvaders', '#spaceinvaders-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300,
+                keys: {
+                    LEFT: 'a',
+                    RIGHT: 'd',
+                    FIRE: ' '
+                }
+            });
+            spaceInvadersGame.start();
+        }
+        
+        function restartGame() {
+            if (spaceInvadersGame) {
+                spaceInvadersGame.destroy();
+            }
+            initGame();
+        }
+        
+        function togglePause() {
+            if (spaceInvadersGame) {
+                // Space Invaders doesn't have pause, so restart instead
+                restartGame();
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+        
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('#spaceinvaders-game')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>

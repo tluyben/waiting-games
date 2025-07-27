@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⛏️ Dig Dug - Underground Adventure Demo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', monospace;
+            background: linear-gradient(180deg, #87CEEB 0%, #F4A460 30%, #8B4513 70%, #654321 100%);
+            color: #FFFF00;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .underground-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.15;
+            background-image: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 8px,
+                    #8B4513 8px,
+                    #8B4513 10px
+                ),
+                repeating-linear-gradient(
+                    -45deg,
+                    transparent,
+                    transparent 8px,
+                    #654321 8px,
+                    #654321 10px
+                ),
+                radial-gradient(circle at 30% 70%, #D2691E 2px, transparent 3px);
+            background-size: 20px 20px, 20px 20px, 40px 40px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(139, 69, 19, 0.9);
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(255, 255, 0, 0.3);
+        }
+
+        .title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #FFFF00;
+            animation: dig 1.5s ease-in-out infinite;
+        }
+
+        @keyframes dig {
+            0%, 100% { 
+                text-shadow: 0 0 10px #FFFF00; 
+                transform: translateY(0px);
+            }
+            50% { 
+                text-shadow: 0 0 20px #FFFF00, 0 0 30px #FFA500; 
+                transform: translateY(-3px);
+            }
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #FFA500;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(139, 69, 19, 0.9);
+            border: 3px solid #FFFF00;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.5);
+        }
+
+        .controls {
+            background: rgba(101, 67, 33, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #FFA500;
+            max-width: 600px;
+        }
+
+        .controls h3 {
+            color: #FFFF00;
+            margin-top: 0;
+            font-size: 14px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-item {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #FFFF00;
+            color: #FFA500;
+        }
+
+        .key {
+            background: #FFA500;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin: 0 2px;
+        }
+
+        .tunnel-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .digger {
+            position: absolute;
+            font-size: 16px;
+            animation: burrow 3s ease-in-out infinite;
+        }
+
+        @keyframes burrow {
+            0%, 100% { transform: translateX(0px) rotate(0deg); }
+            25% { transform: translateX(15px) rotate(-10deg); }
+            50% { transform: translateX(30px) rotate(0deg); }
+            75% { transform: translateX(15px) rotate(10deg); }
+        }
+
+        .monster {
+            position: absolute;
+            font-size: 14px;
+            animation: chase 2.5s linear infinite;
+        }
+
+        @keyframes chase {
+            from { transform: translateX(-20px); }
+            to { transform: translateX(calc(100vw + 20px)); }
+        }
+
+        .tunnel {
+            position: absolute;
+            width: 60px;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 4px;
+            animation: expand 2s ease-in-out infinite;
+        }
+
+        @keyframes expand {
+            0%, 100% { width: 60px; }
+            50% { width: 80px; }
+        }
+
+        .rock {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #696969;
+            border-radius: 50%;
+            animation: crumble 3s ease-in-out infinite;
+        }
+
+        @keyframes crumble {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(0.8); opacity: 0.6; }
+        }
+
+        .ascii-art {
+            color: #FFA500;
+            font-size: 8px;
+            line-height: 1;
+            margin: 20px 0;
+            text-align: center;
+            white-space: pre;
+        }
+
+        .game-info {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #FFA500;
+            max-width: 600px;
+            color: #FFA500;
+        }
+
+        .retro-button {
+            background: #FFA500;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+
+        .retro-button:hover {
+            background: #FFFF00;
+            box-shadow: 0 0 10px #FFFF00;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 20px; }
+            .subtitle { font-size: 10px; }
+            .control-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="underground-pattern"></div>
+    
+    <div class="tunnel-elements">
+        <div class="digger" style="top: 30%; left: 20%;">⛏️</div>
+        <div class="digger" style="top: 60%; right: 30%; animation-delay: 1.5s;">👷</div>
+        <div class="monster" style="top: 25%; animation-delay: 0s;">🐲</div>
+        <div class="monster" style="top: 55%; animation-delay: 2s;">👹</div>
+        <div class="tunnel" style="top: 35%; left: 25%;"></div>
+        <div class="tunnel" style="top: 65%; right: 25%; animation-delay: 1s;"></div>
+        <div class="rock" style="top: 40%; left: 15%;"></div>
+        <div class="rock" style="top: 50%; left: 45%; animation-delay: 1s;"></div>
+        <div class="rock" style="top: 70%; right: 35%; animation-delay: 2s;"></div>
+    </div>
+
+    <div class="header">
+        <h1 class="title">⛏️ DIG DUG</h1>
+        <p class="subtitle">Dig tunnels and defeat underground monsters!</p>
+        
+        <div class="ascii-art">
+▓▓▓▓▓▓▓▓▓▓▓
+▓ ⛏️ ┌─ 🐲 ▓
+▓ ┌──┘    ▓
+▓ │ 👹 ┌──▓
+▓ └────┘  ▓
+▓▓▓▓▓▓▓▓▓▓▓
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div id="digdug-game"></div>
+    </div>
+
+    <div class="controls">
+        <h3>🎮 GAME CONTROLS</h3>
+        <div class="control-grid">
+            <div class="control-item">
+                <strong>Movement:</strong><br>
+                <span class="key">WASD</span> or <span class="key">Arrow Keys</span>
+            </div>
+            <div class="control-item">
+                <strong>Weapon:</strong><br>
+                <span class="key">Space</span> to use pump/harpoon
+            </div>
+            <div class="control-item">
+                <strong>Mobile:</strong><br>
+                Virtual joystick and action button
+            </div>
+            <div class="control-item">
+                <strong>Strategy:</strong><br>
+                Dig smart paths and avoid monsters!
+            </div>
+        </div>
+    </div>
+
+    <div class="game-info">
+        <h3>⛏️ ABOUT DIG DUG</h3>
+        <p>Burrow through the earth as Dig Dug, creating tunnels to pursue and defeat 
+        underground monsters! Use your pump to inflate enemies until they pop, or drop 
+        rocks on them by digging strategically. Clear each level of all monsters to advance!</p>
+        
+        <p><strong>Features:</strong></p>
+        <ul>
+            <li>Innovative digging and tunnel mechanics</li>
+            <li>Unique enemy inflation gameplay</li>
+            <li>Rock-dropping puzzle elements</li>
+            <li>Multiple monster types with different behaviors</li>
+            <li>Strategic path planning challenges</li>
+            <li>Classic Namco arcade action</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin: 20px;">
+        <button class="retro-button" onclick="restartGame()">🔄 RESTART GAME</button>
+        <button class="retro-button" onclick="togglePause()">⏸️ PAUSE/RESUME</button>
+        <a href="all-games-demo.html" class="retro-button" style="text-decoration: none;">🎮 ALL GAMES</a>
+    </div>
+
+    <script src="../dist/waiting-games.js"></script>
+    <script>
+        let digdugGame;
+        
+        function initGame() {
+            digdugGame = WaitingGames.createGame('digdug', '#digdug-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300,
+                keys: {
+                    UP: 'w',
+                    DOWN: 's',
+                    LEFT: 'a',
+                    RIGHT: 'd',
+                    ACTION: ' '
+                }
+            });
+            digdugGame.start();
+        }
+        
+        function restartGame() {
+            if (digdugGame) {
+                digdugGame.destroy();
+            }
+            initGame();
+        }
+        
+        function togglePause() {
+            if (digdugGame) {
+                restartGame();
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+        
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('#digdug-game')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>

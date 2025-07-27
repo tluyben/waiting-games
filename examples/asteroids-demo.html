@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Asteroids Game - Retro Demo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', monospace;
+            background: radial-gradient(circle, #000033, #000000);
+            color: #FFFFFF;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .space-field {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            animation: starTwinkle 4s ease-in-out infinite;
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .asteroid {
+            position: absolute;
+            color: #888888;
+            font-size: 14px;
+            animation: driftSpace 8s linear infinite;
+        }
+
+        @keyframes driftSpace {
+            0% { transform: translateX(-50px) rotate(0deg); }
+            100% { transform: translateX(100vw) rotate(360deg); }
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #FFFFFF;
+            animation: vectorGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes vectorGlow {
+            from { text-shadow: 0 0 10px #FFFFFF; }
+            to { text-shadow: 0 0 20px #FFFFFF, 0 0 30px #FFFFFF; }
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #CCCCCC;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #FFFFFF;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .controls {
+            background: rgba(20, 20, 40, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #888888;
+            max-width: 600px;
+        }
+
+        .controls h3 {
+            color: #FFFFFF;
+            margin-top: 0;
+            font-size: 14px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-item {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #FFFFFF;
+        }
+
+        .key {
+            background: #888888;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin: 0 2px;
+        }
+
+        .ascii-art {
+            color: #CCCCCC;
+            font-size: 8px;
+            line-height: 1;
+            margin: 20px 0;
+            text-align: center;
+            white-space: pre;
+        }
+
+        .game-info {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #888888;
+            max-width: 600px;
+        }
+
+        .retro-button {
+            background: #888888;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+
+        .retro-button:hover {
+            background: #FFFFFF;
+            box-shadow: 0 0 10px #FFFFFF;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 20px; }
+            .subtitle { font-size: 10px; }
+            .control-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="space-field">
+        <div class="star" style="top: 15%; left: 20%; animation-delay: 0s;"></div>
+        <div class="star" style="top: 35%; left: 60%; animation-delay: 1s;"></div>
+        <div class="star" style="top: 65%; left: 30%; animation-delay: 2s;"></div>
+        <div class="star" style="top: 85%; left: 80%; animation-delay: 0.5s;"></div>
+        <div class="star" style="top: 25%; left: 90%; animation-delay: 1.5s;"></div>
+        <div class="asteroid" style="top: 20%; animation-delay: 0s;">🪨</div>
+        <div class="asteroid" style="top: 60%; animation-delay: 3s;">🗿</div>
+        <div class="asteroid" style="top: 40%; animation-delay: 5s;">⚫</div>
+    </div>
+
+    <div class="header">
+        <h1 class="title">🚀 ASTEROIDS</h1>
+        <p class="subtitle">Navigate the asteroid field and survive!</p>
+        
+        <div class="ascii-art">
+    /\    ○ ○ ○
+   /  \      ○
+  /____\  ○    ○
+     ▲     ○ ○
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div id="asteroids-game"></div>
+    </div>
+
+    <div class="controls">
+        <h3>🎮 GAME CONTROLS</h3>
+        <div class="control-grid">
+            <div class="control-item">
+                <strong>Thrust:</strong><br>
+                <span class="key">W</span> or <span class="key">Up</span> arrow
+            </div>
+            <div class="control-item">
+                <strong>Rotate:</strong><br>
+                <span class="key">A</span> / <span class="key">D</span> or <span class="key">Left</span> / <span class="key">Right</span>
+            </div>
+            <div class="control-item">
+                <strong>Fire:</strong><br>
+                <span class="key">SPACE</span> to shoot
+            </div>
+            <div class="control-item">
+                <strong>Mobile:</strong><br>
+                Tap and drag to control ship
+            </div>
+        </div>
+    </div>
+
+    <div class="game-info">
+        <h3>🚀 ABOUT ASTEROIDS</h3>
+        <p>The classic vector graphics space shooter! Pilot your ship through a dangerous asteroid field, 
+        using realistic momentum physics. Destroy asteroids by shooting them, but watch out - large 
+        asteroids break into smaller, faster pieces!</p>
+        
+        <p><strong>Features:</strong></p>
+        <ul>
+            <li>Realistic momentum-based physics</li>
+            <li>360-degree rotation and movement</li>
+            <li>Asteroids break into smaller pieces</li>
+            <li>UFO enemies with AI</li>
+            <li>Screen wrapping mechanics</li>
+            <li>Classic vector graphics style</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin: 20px;">
+        <button class="retro-button" onclick="restartGame()">🔄 RESTART GAME</button>
+        <button class="retro-button" onclick="togglePause()">⏸️ PAUSE/RESUME</button>
+        <a href="all-games-demo.html" class="retro-button" style="text-decoration: none;">🎮 ALL GAMES</a>
+    </div>
+
+    <script src="../dist/waiting-games.js"></script>
+    <script>
+        let asteroidsGame;
+        
+        function initGame() {
+            asteroidsGame = WaitingGames.createGame('asteroids', '#asteroids-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300,
+                keys: {
+                    UP: 'w',
+                    LEFT: 'a',
+                    RIGHT: 'd',
+                    FIRE: ' '
+                }
+            });
+            asteroidsGame.start();
+        }
+        
+        function restartGame() {
+            if (asteroidsGame) {
+                asteroidsGame.destroy();
+            }
+            initGame();
+        }
+        
+        function togglePause() {
+            if (asteroidsGame) {
+                restartGame();
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+        
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('#asteroids-game')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>

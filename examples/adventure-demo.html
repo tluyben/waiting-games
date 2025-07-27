@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗡️ Adventure Game - Dungeon Quest Demo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', monospace;
+            background: linear-gradient(180deg, #2F2F2F 0%, #1A1A1A 50%, #000000 100%);
+            color: #8B008B;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .dungeon-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.15;
+            background-image: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 30px,
+                    #4A4A4A 30px,
+                    #4A4A4A 32px
+                ),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 30px,
+                    #333333 30px,
+                    #333333 32px
+                );
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(26, 26, 26, 0.9);
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(139, 0, 139, 0.3);
+        }
+
+        .title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #8B008B;
+            animation: mystical 2s ease-in-out infinite;
+        }
+
+        @keyframes mystical {
+            0%, 100% { text-shadow: 0 0 10px #8B008B; }
+            50% { text-shadow: 0 0 20px #8B008B, 0 0 30px #9370DB; }
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #9370DB;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(26, 26, 26, 0.9);
+            border: 3px solid #8B008B;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(139, 0, 139, 0.5);
+        }
+
+        .controls {
+            background: rgba(47, 47, 47, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #9370DB;
+            max-width: 600px;
+        }
+
+        .controls h3 {
+            color: #8B008B;
+            margin-top: 0;
+            font-size: 14px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-item {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #8B008B;
+            color: #9370DB;
+        }
+
+        .key {
+            background: #9370DB;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin: 0 2px;
+        }
+
+        .floating-items {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .sword {
+            position: absolute;
+            width: 16px;
+            height: 4px;
+            background: #C0C0C0;
+            border-radius: 2px;
+            animation: gleam 3s ease-in-out infinite;
+        }
+
+        @keyframes gleam {
+            0%, 100% { box-shadow: 0 0 5px #C0C0C0; }
+            50% { box-shadow: 0 0 15px #FFFFFF; }
+        }
+
+        .key-item {
+            position: absolute;
+            width: 8px;
+            height: 12px;
+            background: #FFD700;
+            border-radius: 2px 2px 0 0;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
+
+        .dragon {
+            position: absolute;
+            font-size: 16px;
+            animation: roam 5s linear infinite;
+        }
+
+        @keyframes roam {
+            from { transform: translateX(-30px); }
+            to { transform: translateX(calc(100vw + 30px)); }
+        }
+
+        .ascii-art {
+            color: #9370DB;
+            font-size: 8px;
+            line-height: 1;
+            margin: 20px 0;
+            text-align: center;
+            white-space: pre;
+        }
+
+        .game-info {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #9370DB;
+            max-width: 600px;
+            color: #9370DB;
+        }
+
+        .retro-button {
+            background: #9370DB;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+
+        .retro-button:hover {
+            background: #8B008B;
+            color: #FFF;
+            box-shadow: 0 0 10px #8B008B;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 20px; }
+            .subtitle { font-size: 10px; }
+            .control-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dungeon-pattern"></div>
+    
+    <div class="floating-items">
+        <div class="sword" style="top: 20%; left: 15%;"></div>
+        <div class="sword" style="top: 60%; left: 35%; animation-delay: 1.5s;"></div>
+        <div class="key-item" style="top: 40%; left: 25%; animation-delay: 0.8s;"></div>
+        <div class="key-item" style="top: 80%; left: 45%; animation-delay: 2.3s;"></div>
+        <div class="dragon" style="top: 30%; color: #FF4500;">🐉</div>
+        <div class="dragon" style="top: 70%; color: #8B008B; animation-delay: 2.5s; animation-duration: 7s;">🐲</div>
+    </div>
+
+    <div class="header">
+        <h1 class="title">🗡️ ADVENTURE</h1>
+        <p class="subtitle">Explore the enchanted kingdom and find the chalice!</p>
+        
+        <div class="ascii-art">
+🏰═══════════🏰
+║ 🗡️  🗝️  🏆 ║
+║     🐉     ║
+🚪═══════════🚪
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div id="adventure-game"></div>
+    </div>
+
+    <div class="controls">
+        <h3>🎮 GAME CONTROLS</h3>
+        <div class="control-grid">
+            <div class="control-item">
+                <strong>Movement:</strong><br>
+                <span class="key">WASD</span> or <span class="key">Arrow Keys</span>
+            </div>
+            <div class="control-item">
+                <strong>Action:</strong><br>
+                <span class="key">Space</span> to pick up/drop items
+            </div>
+            <div class="control-item">
+                <strong>Mobile:</strong><br>
+                Swipe to move, tap to interact
+            </div>
+            <div class="control-item">
+                <strong>Goal:</strong><br>
+                Find the enchanted chalice!
+            </div>
+        </div>
+    </div>
+
+    <div class="game-info">
+        <h3>🗡️ ABOUT ADVENTURE</h3>
+        <p>Embark on the first action-adventure quest! Explore a mystical kingdom, 
+        collect magical items, defeat fearsome dragons, and find the enchanted chalice. 
+        This groundbreaking game established many conventions of the adventure genre.</p>
+        
+        <p><strong>Features:</strong></p>
+        <ul>
+            <li>Expansive multi-screen world exploration</li>
+            <li>Item collection and inventory system</li>
+            <li>Dragons with unique AI behaviors</li>
+            <li>Hidden secrets and Easter eggs</li>
+            <li>Three difficulty levels</li>
+            <li>Maze navigation and puzzle solving</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin: 20px;">
+        <button class="retro-button" onclick="restartGame()">🔄 RESTART GAME</button>
+        <button class="retro-button" onclick="togglePause()">⏸️ PAUSE/RESUME</button>
+        <a href="all-games-demo.html" class="retro-button" style="text-decoration: none;">🎮 ALL GAMES</a>
+    </div>
+
+    <script src="../dist/waiting-games.js"></script>
+    <script>
+        let adventureGame;
+        
+        function initGame() {
+            adventureGame = WaitingGames.createGame('adventure', '#adventure-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300,
+                keys: {
+                    UP: 'w',
+                    DOWN: 's',
+                    LEFT: 'a',
+                    RIGHT: 'd',
+                    ACTION: ' '
+                }
+            });
+            adventureGame.start();
+        }
+        
+        function restartGame() {
+            if (adventureGame) {
+                adventureGame.destroy();
+            }
+            initGame();
+        }
+        
+        function togglePause() {
+            if (adventureGame) {
+                restartGame();
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+        
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('#adventure-game')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>

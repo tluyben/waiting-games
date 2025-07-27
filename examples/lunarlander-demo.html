@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌙 Lunar Lander - Space Landing Demo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', monospace;
+            background: linear-gradient(180deg, #000033 0%, #000066 50%, #666666 100%);
+            color: #FFFFFF;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .space-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.2;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #FFFFFF, transparent),
+                radial-gradient(2px 2px at 40px 70px, #FFFF00, transparent),
+                radial-gradient(1px 1px at 90px 40px, #FFFFFF, transparent),
+                radial-gradient(1px 1px at 130px 80px, #FFFFFF, transparent),
+                radial-gradient(2px 2px at 160px 30px, #FFFFFF, transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 51, 0.9);
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #FFFFFF;
+            animation: orbit 3s ease-in-out infinite;
+        }
+
+        @keyframes orbit {
+            0%, 100% { text-shadow: 0 0 10px #FFFFFF; }
+            50% { text-shadow: 0 0 20px #FFFFFF, 0 0 30px #00BFFF; }
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #00BFFF;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 0, 51, 0.9);
+            border: 3px solid #FFFFFF;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+
+        .controls {
+            background: rgba(0, 0, 102, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #00BFFF;
+            max-width: 600px;
+        }
+
+        .controls h3 {
+            color: #FFFFFF;
+            margin-top: 0;
+            font-size: 14px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-item {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #FFFFFF;
+            color: #00BFFF;
+        }
+
+        .key {
+            background: #00BFFF;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin: 0 2px;
+        }
+
+        .floating-objects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .lander {
+            position: absolute;
+            font-size: 16px;
+            animation: descend 4s ease-in infinite;
+        }
+
+        @keyframes descend {
+            from { transform: translateY(-30px) rotate(-5deg); }
+            to { transform: translateY(calc(100vh + 30px)) rotate(5deg); }
+        }
+
+        .moon-rock {
+            position: absolute;
+            width: 12px;
+            height: 8px;
+            background: #C0C0C0;
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .thruster {
+            position: absolute;
+            width: 4px;
+            height: 12px;
+            background: linear-gradient(180deg, #FF4500, #FFFF00);
+            animation: thrust 0.3s ease-in-out infinite;
+        }
+
+        @keyframes thrust {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
+
+        .ascii-art {
+            color: #00BFFF;
+            font-size: 8px;
+            line-height: 1;
+            margin: 20px 0;
+            text-align: center;
+            white-space: pre;
+        }
+
+        .game-info {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #00BFFF;
+            max-width: 600px;
+            color: #00BFFF;
+        }
+
+        .retro-button {
+            background: #00BFFF;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+
+        .retro-button:hover {
+            background: #FFFFFF;
+            box-shadow: 0 0 10px #FFFFFF;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 20px; }
+            .subtitle { font-size: 10px; }
+            .control-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="space-pattern"></div>
+    
+    <div class="floating-objects">
+        <div class="lander" style="top: 20%; left: 25%;">🚀</div>
+        <div class="lander" style="top: 50%; right: 30%; animation-delay: 2s;">🛸</div>
+        <div class="moon-rock" style="bottom: 25%; left: 15%;"></div>
+        <div class="moon-rock" style="bottom: 35%; left: 35%; animation-delay: 1s;"></div>
+        <div class="moon-rock" style="bottom: 20%; right: 25%; animation-delay: 2s;"></div>
+        <div class="thruster" style="bottom: 30%; left: 50%;"></div>
+        <div class="thruster" style="bottom: 40%; right: 40%; animation-delay: 0.5s;"></div>
+    </div>
+
+    <div class="header">
+        <h1 class="title">🌙 LUNAR LANDER</h1>
+        <p class="subtitle">Navigate the lunar surface and land safely!</p>
+        
+        <div class="ascii-art">
+    ⭐  ⭐  ⭐
+      🚀
+     /|\
+    🔥🔥🔥
+▒▒▒▒▒▒▒▒▒▒
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div id="lunarlander-game"></div>
+    </div>
+
+    <div class="controls">
+        <h3>🎮 GAME CONTROLS</h3>
+        <div class="control-grid">
+            <div class="control-item">
+                <strong>Thrusters:</strong><br>
+                <span class="key">W</span> main, <span class="key">A/D</span> rotate
+            </div>
+            <div class="control-item">
+                <strong>Landing:</strong><br>
+                Control speed and angle carefully
+            </div>
+            <div class="control-item">
+                <strong>Mobile:</strong><br>
+                Tap thrust, swipe to rotate
+            </div>
+            <div class="control-item">
+                <strong>Fuel:</strong><br>
+                Manage fuel consumption wisely!
+            </div>
+        </div>
+    </div>
+
+    <div class="game-info">
+        <h3>🌙 ABOUT LUNAR LANDER</h3>
+        <p>Pilot your lunar module to a safe landing on the moon's surface! 
+        Master realistic physics as you control thrust and rotation while managing 
+        limited fuel supplies. One of the earliest realistic space simulations.</p>
+        
+        <p><strong>Features:</strong></p>
+        <ul>
+            <li>Realistic physics simulation</li>
+            <li>Fuel management mechanics</li>
+            <li>Precise landing challenges</li>
+            <li>Multiple difficulty terrain</li>
+            <li>Gravity and momentum effects</li>
+            <li>Classic vector graphics style</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin: 20px;">
+        <button class="retro-button" onclick="restartGame()">🔄 RESTART GAME</button>
+        <button class="retro-button" onclick="togglePause()">⏸️ PAUSE/RESUME</button>
+        <a href="all-games-demo.html" class="retro-button" style="text-decoration: none;">🎮 ALL GAMES</a>
+    </div>
+
+    <script src="../dist/waiting-games.js"></script>
+    <script>
+        let lunarlanderGame;
+        
+        function initGame() {
+            lunarlanderGame = WaitingGames.createGame('lunarlander', '#lunarlander-game', {
+                useKeyboard: true,
+                useMobile: true,
+                width: 400,
+                height: 300,
+                keys: {
+                    THRUST: 'w',
+                    LEFT: 'a',
+                    RIGHT: 'd'
+                }
+            });
+            lunarlanderGame.start();
+        }
+        
+        function restartGame() {
+            if (lunarlanderGame) {
+                lunarlanderGame.destroy();
+            }
+            initGame();
+        }
+        
+        function togglePause() {
+            if (lunarlanderGame) {
+                restartGame();
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+        
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('#lunarlander-game')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
