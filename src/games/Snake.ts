@@ -15,6 +15,8 @@ export class Snake extends GameEngine {
   private gridSize = 20;
   private score = 0;
   private gameOver = false;
+  private lastMoveTime = 0;
+  private moveInterval = 200; // Move every 200ms
 
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     super(container, config);
@@ -104,6 +106,13 @@ export class Snake extends GameEngine {
   protected update(): void {
     if (this.gameOver) return;
 
+    // Only move snake at controlled intervals
+    const currentTime = Date.now();
+    if (currentTime - this.lastMoveTime < this.moveInterval) {
+      return;
+    }
+    this.lastMoveTime = currentTime;
+
     const head = { ...this.snake[0] };
 
     switch (this.direction) {
@@ -179,10 +188,6 @@ export class Snake extends GameEngine {
 
   start(): void {
     super.start();
-    setInterval(() => {
-      if (this.isRunning && !this.isPaused && !this.gameOver) {
-        this.update();
-      }
-    }, 150);
+    this.lastMoveTime = Date.now();
   }
 }

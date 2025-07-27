@@ -140,6 +140,8 @@
             this.gridSize = 20;
             this.score = 0;
             this.gameOver = false;
+            this.lastMoveTime = 0;
+            this.moveInterval = 200; // Move every 200ms
             this.initGame();
         }
         initGame() {
@@ -221,6 +223,12 @@
         update() {
             if (this.gameOver)
                 return;
+            // Only move snake at controlled intervals
+            const currentTime = Date.now();
+            if (currentTime - this.lastMoveTime < this.moveInterval) {
+                return;
+            }
+            this.lastMoveTime = currentTime;
             const head = { ...this.snake[0] };
             switch (this.direction) {
                 case Direction$1.UP:
@@ -283,11 +291,7 @@
         }
         start() {
             super.start();
-            setInterval(() => {
-                if (this.isRunning && !this.isPaused && !this.gameOver) {
-                    this.update();
-                }
-            }, 150);
+            this.lastMoveTime = Date.now();
         }
     }
 
