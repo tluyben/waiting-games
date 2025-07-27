@@ -16,7 +16,7 @@ export class Snake extends GameEngine {
   private score = 0;
   private gameOver = false;
   private lastMoveTime = 0;
-  private moveInterval = 200; // Move every 200ms
+  private moveInterval = 400; // Move every 400ms (2.5 moves per second)
 
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     super(container, config);

@@ -137,7 +137,7 @@ class Snake extends GameEngine {
         this.score = 0;
         this.gameOver = false;
         this.lastMoveTime = 0;
-        this.moveInterval = 200; // Move every 200ms
+        this.moveInterval = 400; // Move every 400ms (2.5 moves per second)
         this.initGame();
     }
     initGame() {
