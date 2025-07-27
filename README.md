@@ -1,5 +1,7 @@
 # 🕹️ Waiting Games
 
+**Live Demo:** [https://waiting-games.my](https://waiting-games.my)
+
 Retro games for error pages and waiting screens. Add engaging mini-games to keep users entertained while they wait.
 
 **20 Classic Arcade Games** from the golden age of gaming (1970s-1980s) including Snake, Pong, Pac-Man, Tetris, Space Invaders, Asteroids, and many more!
@@ -10,7 +12,7 @@ Retro games for error pages and waiting screens. Add engaging mini-games to keep
 
 ```html
 <!-- Via CDN -->
-<script src="https://unpkg.com/waiting-games@latest/dist/waiting-games.js"></script>
+<script src="https://tluyben.github.io/waiting-games/dist/waiting-games.js"></script>
 
 <!-- Or via npm -->
 <script>
@@ -468,7 +470,7 @@ npm install waiting-games
 
 Or use via CDN:
 ```html
-<script src="https://unpkg.com/waiting-games@latest/dist/waiting-games.js"></script>
+<script src="https://tluyben.github.io/waiting-games/dist/waiting-games.js"></script>
 ```
 
 ## 📦 Bundle Size
