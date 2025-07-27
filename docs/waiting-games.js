@@ -141,7 +141,7 @@
             this.score = 0;
             this.gameOver = false;
             this.lastMoveTime = 0;
-            this.moveInterval = 400; // Move every 400ms (2.5 moves per second)
+            this.moveInterval = 1000; // Move every 1000ms (1 move per second)
             this.initGame();
         }
         initGame() {
@@ -150,6 +150,7 @@
             this.score = 0;
             this.gameOver = false;
             this.direction = Direction$1.RIGHT;
+            this.lastMoveTime = 0;
         }
         generateFood() {
             const maxX = Math.floor(this.config.width / this.gridSize);
@@ -225,9 +226,11 @@
                 return;
             // Only move snake at controlled intervals
             const currentTime = Date.now();
-            if (currentTime - this.lastMoveTime < this.moveInterval) {
+            const timeSinceLastMove = currentTime - this.lastMoveTime;
+            if (timeSinceLastMove < this.moveInterval) {
                 return;
             }
+            console.log('Snake moving! Time since last move:', timeSinceLastMove);
             this.lastMoveTime = currentTime;
             const head = { ...this.snake[0] };
             switch (this.direction) {

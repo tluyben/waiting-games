@@ -16,7 +16,7 @@ export class Snake extends GameEngine {
   private score = 0;
   private gameOver = false;
   private lastMoveTime = 0;
-  private moveInterval = 400; // Move every 400ms (2.5 moves per second)
+  private moveInterval = 1000; // Move every 1000ms (1 move per second)
 
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     super(container, config);
@@ -29,6 +29,7 @@ export class Snake extends GameEngine {
     this.score = 0;
     this.gameOver = false;
     this.direction = Direction.RIGHT;
+    this.lastMoveTime = 0;
   }
 
   private generateFood(): void {
@@ -108,9 +109,12 @@ export class Snake extends GameEngine {
 
     // Only move snake at controlled intervals
     const currentTime = Date.now();
-    if (currentTime - this.lastMoveTime < this.moveInterval) {
+    const timeSinceLastMove = currentTime - this.lastMoveTime;
+    if (timeSinceLastMove < this.moveInterval) {
       return;
     }
+    
+    console.log('Snake moving! Time since last move:', timeSinceLastMove);
     this.lastMoveTime = currentTime;
 
     const head = { ...this.snake[0] };

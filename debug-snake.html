@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Snake</title>
+</head>
+<body>
+    <div id="game-container"></div>
+    <div id="debug"></div>
+    <script src="./dist/waiting-games.js"></script>
+    <script>
+        const debug = document.getElementById('debug');
+        let lastUpdate = Date.now();
+        let updateCount = 0;
+        
+        // Override console.log to show in page
+        const originalLog = console.log;
+        console.log = function(...args) {
+            debug.innerHTML += args.join(' ') + '<br>';
+            originalLog.apply(console, args);
+        };
+        
+        const game = WaitingGames.createGame('snake', '#game-container', {
+            useKeyboard: true,
+            width: 400,
+            height: 300
+        });
+        
+        // Monitor update frequency
+        setInterval(() => {
+            const now = Date.now();
+            console.log(`Updates in last second: ${updateCount}, Time since last: ${now - lastUpdate}ms`);
+            updateCount = 0;
+            lastUpdate = now;
+        }, 1000);
+        
+        game.start();
+    </script>
+</body>
+</html>
