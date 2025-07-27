@@ -1,0 +1,30 @@
+import { GameEngine } from '../GameEngine';
+import { GameConfig } from '../types';
+export declare class Joust extends GameEngine {
+    private player;
+    private enemies;
+    private platforms;
+    private eggs;
+    private score;
+    private lives;
+    private level;
+    private gameState;
+    private gravity;
+    private flapPower;
+    private enemySpawnTimer;
+    private waveComplete;
+    constructor(container: HTMLElement | string, config?: GameConfig);
+    private initGame;
+    private createPlatforms;
+    private spawnEnemyWave;
+    protected handleKeyDown(event: KeyboardEvent): void;
+    protected handleTouchStart(event: TouchEvent): void;
+    private flapWings;
+    private checkPlatformCollision;
+    private updatePlayer;
+    private updateEnemies;
+    private checkCombat;
+    private updateEggs;
+    protected update(): void;
+    protected render(): void;
+}

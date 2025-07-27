@@ -1,0 +1,31 @@
+import { GameEngine } from '../GameEngine';
+import { GameConfig } from '../types';
+export declare class Berzerk extends GameEngine {
+    private player;
+    private robots;
+    private bullets;
+    private walls;
+    private exits;
+    private score;
+    private lives;
+    private level;
+    private gameState;
+    private roomWidth;
+    private roomHeight;
+    private cellSize;
+    private evilOtto;
+    constructor(container: HTMLElement | string, config?: GameConfig);
+    private initGame;
+    private generateRoom;
+    protected handleKeyDown(event: KeyboardEvent): void;
+    protected handleTouchStart(event: TouchEvent): void;
+    protected handleTouchEnd(event: TouchEvent): void;
+    private shoot;
+    private checkWallCollision;
+    private hasLineOfSight;
+    private updatePlayer;
+    private updateRobots;
+    private updateBullets;
+    protected update(): void;
+    protected render(): void;
+}

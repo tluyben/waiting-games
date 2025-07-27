@@ -1,0 +1,34 @@
+import { GameEngine } from '../GameEngine';
+import { GameConfig } from '../types';
+export declare class DigDug extends GameEngine {
+    private player;
+    private enemies;
+    private pump;
+    private rocks;
+    private tunnels;
+    private grid;
+    private score;
+    private lives;
+    private level;
+    private gameState;
+    private cellSize;
+    private gridWidth;
+    private gridHeight;
+    constructor(container: HTMLElement | string, config?: GameConfig);
+    private initGame;
+    private generateLevel;
+    private digTunnel;
+    private isInTunnel;
+    protected handleKeyDown(event: KeyboardEvent): void;
+    protected handleKeyUp(event: KeyboardEvent): void;
+    protected handleTouchStart(event: TouchEvent): void;
+    protected handleTouchEnd(event: TouchEvent): void;
+    private startPump;
+    private stopPump;
+    private updatePlayer;
+    private updateEnemies;
+    private updatePump;
+    private updateRocks;
+    protected update(): void;
+    protected render(): void;
+}

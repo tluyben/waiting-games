@@ -1,0 +1,32 @@
+import { GameEngine } from '../GameEngine';
+import { GameConfig } from '../types';
+export declare class Tetris extends GameEngine {
+    private grid;
+    private currentPiece;
+    private nextPiece;
+    private score;
+    private lines;
+    private level;
+    private dropTimer;
+    private dropInterval;
+    private gameState;
+    private keys;
+    private blockSize;
+    private gridWidth;
+    private gridHeight;
+    constructor(container: HTMLElement | string, config?: GameConfig);
+    private initGame;
+    private createRandomPiece;
+    private shapeToBlocks;
+    protected handleKeyDown(event: KeyboardEvent): void;
+    protected handleKeyUp(event: KeyboardEvent): void;
+    protected handleTouchStart(event: TouchEvent): void;
+    private movePiece;
+    private rotatePiece;
+    private dropPiece;
+    private checkCollision;
+    private placePiece;
+    private clearLines;
+    protected update(): void;
+    protected render(): void;
+}
