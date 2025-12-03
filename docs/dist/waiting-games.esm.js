@@ -407,10 +407,10 @@ class Pong extends GameEngine {
         }
         // Human controls for right paddle
         if (this.config.useKeyboard) {
-            if (this.isKeyPressed('UP', { key: Object.keys(this.keys).find(k => this.keys[k] && k === this.keyMap.UP) || '' }) || this.keys['w'] || this.keys['W']) {
+            if (this.keys[this.keyMap.UP] || this.keys['w'] || this.keys['W'] || this.keys['ArrowUp']) {
                 this.rightPaddle.y -= this.rightPaddle.speed;
             }
-            if (this.isKeyPressed('DOWN', { key: Object.keys(this.keys).find(k => this.keys[k] && k === this.keyMap.DOWN) || '' }) || this.keys['s'] || this.keys['S']) {
+            if (this.keys[this.keyMap.DOWN] || this.keys['s'] || this.keys['S'] || this.keys['ArrowDown']) {
                 this.rightPaddle.y += this.rightPaddle.speed;
             }
         }
@@ -468,12 +468,16 @@ class Pong extends GameEngine {
         this.ctx.textAlign = 'center';
         this.ctx.fillText(this.leftScore.toString(), this.config.width / 4, 50);
         this.ctx.fillText(this.rightScore.toString(), (3 * this.config.width) / 4, 50);
+        // Player labels
+        this.ctx.font = '12px Arial';
+        this.ctx.fillText('CPU', this.config.width / 4, 70);
+        this.ctx.fillText('YOU', (3 * this.config.width) / 4, 70);
         if (this.gameState === 'waiting') {
             this.ctx.font = '20px Arial';
             this.ctx.fillText('Press SPACE or tap to start', this.config.width / 2, this.config.height / 2 + 50);
             if (this.config.useKeyboard) {
                 this.ctx.font = '14px Arial';
-                this.ctx.fillText('Use W/S or ↑/↓ to control right paddle', this.config.width / 2, this.config.height / 2 + 80);
+                this.ctx.fillText('Use W/S or Arrow keys to move', this.config.width / 2, this.config.height / 2 + 80);
             }
         }
         else if (this.gameState === 'paused') {
@@ -588,10 +592,10 @@ class Breakout extends GameEngine {
         if (this.gameState !== 'playing')
             return;
         if (this.config.useKeyboard) {
-            if (this.keys[this.keyMap.LEFT] || this.keys['a'] || this.keys['A']) {
+            if (this.keys[this.keyMap.LEFT] || this.keys['a'] || this.keys['A'] || this.keys['ArrowLeft']) {
                 this.paddle.x -= this.paddle.speed;
             }
-            if (this.keys[this.keyMap.RIGHT] || this.keys['d'] || this.keys['D']) {
+            if (this.keys[this.keyMap.RIGHT] || this.keys['d'] || this.keys['D'] || this.keys['ArrowRight']) {
                 this.paddle.x += this.paddle.speed;
             }
         }

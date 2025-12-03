@@ -592,10 +592,10 @@ class Breakout extends GameEngine {
         if (this.gameState !== 'playing')
             return;
         if (this.config.useKeyboard) {
-            if (this.keys[this.keyMap.LEFT] || this.keys['a'] || this.keys['A']) {
+            if (this.keys[this.keyMap.LEFT] || this.keys['a'] || this.keys['A'] || this.keys['ArrowLeft']) {
                 this.paddle.x -= this.paddle.speed;
             }
-            if (this.keys[this.keyMap.RIGHT] || this.keys['d'] || this.keys['D']) {
+            if (this.keys[this.keyMap.RIGHT] || this.keys['d'] || this.keys['D'] || this.keys['ArrowRight']) {
                 this.paddle.x += this.paddle.speed;
             }
         }
