@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 
 interface Block {
@@ -90,6 +90,40 @@ export class Tetris extends GameEngine {
     this.blockSize = Math.floor(availableHeight / this.gridHeight);
     this.offsetY = uiHeight - 50; // Position grid after UI area
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '↻',
+      showSecondaryButton: true,
+      secondaryButtonLabel: '⬇'
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    if (this.gameState === 'gameOver') {
+      this.initGame();
+    } else if (this.currentPiece) {
+      this.rotatePiece();
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    // No action needed
+  }
+
+  protected onSecondaryButtonPress(): void {
+    // Hard drop
+    if (this.currentPiece && this.gameState === 'playing') {
+      this.dropPiece();
+    }
+  }
+
+  protected onSecondaryButtonRelease(): void {
+    // No action needed
   }
 
   private initGame(): void {

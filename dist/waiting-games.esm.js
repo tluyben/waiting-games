@@ -1,26 +1,53 @@
 import React, { useRef, useEffect } from 'react';
 
+// Detect if the device is mobile/tablet
+function isMobileDevice() {
+    var _a, _b, _c;
+    // Check for touch support
+    const hasTouchScreen = 'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        ((_a = navigator.msMaxTouchPoints) !== null && _a !== void 0 ? _a : 0) > 0;
+    // Check user agent for mobile/tablet
+    const userAgent = (_c = (_b = navigator.userAgent) === null || _b === void 0 ? void 0 : _b.toLowerCase()) !== null && _c !== void 0 ? _c : '';
+    const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet/i.test(userAgent);
+    // Check screen size (tablets and phones typically < 1024px width in portrait)
+    const isSmallScreen = window.innerWidth <= 1024 || window.innerHeight <= 1024;
+    return hasTouchScreen && (isMobileUA || isSmallScreen);
+}
 class GameEngine {
     constructor(container, config = {}) {
         this.keys = {};
         this.animationId = null;
         this.isRunning = false;
         this.isPaused = false;
+        // Mobile controls state
+        this.mobileControlsContainer = null;
+        this.dpadState = {
+            up: false, down: false, left: false, right: false
+        };
+        this.actionButtonPressed = false;
+        this.secondaryButtonPressed = false;
         const element = typeof container === 'string'
             ? document.querySelector(container)
             : container;
         if (!element) {
             throw new Error('Container element not found');
         }
+        // Detect mobile device
+        this.isMobile = isMobileDevice();
         this.config = {
             useKeyboard: true,
-            useMobile: false,
+            useMobile: this.isMobile, // Auto-enable mobile controls on mobile devices
             width: 600,
             height: 400,
             theme: 'classic',
             keys: {},
             ...config
         };
+        // If explicitly set in config, use that value
+        if (config.useMobile !== undefined) {
+            this.config.useMobile = config.useMobile;
+        }
         this.keyMap = {
             UP: 'ArrowUp',
             DOWN: 'ArrowDown',
@@ -41,6 +68,7 @@ class GameEngine {
         this.canvas.height = this.config.height;
         this.canvas.style.border = '2px solid #333';
         this.canvas.style.backgroundColor = '#000';
+        this.canvas.style.display = 'block';
         const ctx = this.canvas.getContext('2d');
         if (!ctx) {
             throw new Error('Could not get 2D context');
@@ -84,9 +112,233 @@ class GameEngine {
         }
     }
     setupMobileControls() {
+        // Set up touch events on canvas for backwards compatibility
         this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
         this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
         this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
+        // Create visible mobile controls overlay if on mobile
+        if (this.isMobile && this.config.useMobile) {
+            this.createMobileControlsOverlay();
+        }
+    }
+    // Get mobile controls configuration - subclasses should override this
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: 'A',
+            showSecondaryButton: false,
+            secondaryButtonLabel: 'B'
+        };
+    }
+    createMobileControlsOverlay() {
+        const controlsConfig = this.getMobileControlsConfig();
+        // Create container for mobile controls
+        this.mobileControlsContainer = document.createElement('div');
+        this.mobileControlsContainer.className = 'mobile-controls-overlay';
+        this.mobileControlsContainer.style.cssText = `
+      position: relative;
+      width: ${this.config.width}px;
+      height: 120px;
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    `;
+        // Create D-Pad
+        if (controlsConfig.showDpad) {
+            const dpad = this.createDpad();
+            this.mobileControlsContainer.appendChild(dpad);
+        }
+        else {
+            // Add spacer if no d-pad
+            const spacer = document.createElement('div');
+            spacer.style.width = '120px';
+            this.mobileControlsContainer.appendChild(spacer);
+        }
+        // Create action buttons container
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.style.cssText = `
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    `;
+        if (controlsConfig.showSecondaryButton) {
+            const secondaryButton = this.createActionButton(controlsConfig.secondaryButtonLabel, '#666', () => { this.secondaryButtonPressed = true; this.onSecondaryButtonPress(); }, () => { this.secondaryButtonPressed = false; this.onSecondaryButtonRelease(); });
+            buttonsContainer.appendChild(secondaryButton);
+        }
+        if (controlsConfig.showActionButton) {
+            const actionButton = this.createActionButton(controlsConfig.actionButtonLabel, '#e74c3c', () => { this.actionButtonPressed = true; this.onActionButtonPress(); }, () => { this.actionButtonPressed = false; this.onActionButtonRelease(); });
+            buttonsContainer.appendChild(actionButton);
+        }
+        this.mobileControlsContainer.appendChild(buttonsContainer);
+        // Insert controls after canvas
+        if (this.canvas.parentNode) {
+            this.canvas.parentNode.insertBefore(this.mobileControlsContainer, this.canvas.nextSibling);
+        }
+    }
+    createDpad() {
+        const dpad = document.createElement('div');
+        dpad.style.cssText = `
+      position: relative;
+      width: 120px;
+      height: 120px;
+    `;
+        // Common button style
+        const buttonStyle = `
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    `;
+        // Up button
+        const upBtn = document.createElement('div');
+        upBtn.innerHTML = '▲';
+        upBtn.style.cssText = buttonStyle + 'left: 40px; top: 0;';
+        this.setupDpadButton(upBtn, 'up');
+        dpad.appendChild(upBtn);
+        // Down button
+        const downBtn = document.createElement('div');
+        downBtn.innerHTML = '▼';
+        downBtn.style.cssText = buttonStyle + 'left: 40px; bottom: 0;';
+        this.setupDpadButton(downBtn, 'down');
+        dpad.appendChild(downBtn);
+        // Left button
+        const leftBtn = document.createElement('div');
+        leftBtn.innerHTML = '◀';
+        leftBtn.style.cssText = buttonStyle + 'left: 0; top: 40px;';
+        this.setupDpadButton(leftBtn, 'left');
+        dpad.appendChild(leftBtn);
+        // Right button
+        const rightBtn = document.createElement('div');
+        rightBtn.innerHTML = '▶';
+        rightBtn.style.cssText = buttonStyle + 'right: 0; top: 40px;';
+        this.setupDpadButton(rightBtn, 'right');
+        dpad.appendChild(rightBtn);
+        // Center (optional visual)
+        const center = document.createElement('div');
+        center.style.cssText = `
+      position: absolute;
+      left: 40px;
+      top: 40px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    `;
+        dpad.appendChild(center);
+        return dpad;
+    }
+    setupDpadButton(button, direction) {
+        const handlePress = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.dpadState[direction] = true;
+            this.updateKeysFromDpad();
+            button.style.background = 'rgba(255, 255, 255, 0.6)';
+        };
+        const handleRelease = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.dpadState[direction] = false;
+            this.updateKeysFromDpad();
+            button.style.background = 'rgba(255, 255, 255, 0.3)';
+        };
+        button.addEventListener('touchstart', handlePress, { passive: false });
+        button.addEventListener('touchend', handleRelease, { passive: false });
+        button.addEventListener('touchcancel', handleRelease, { passive: false });
+        button.addEventListener('mousedown', handlePress);
+        button.addEventListener('mouseup', handleRelease);
+        button.addEventListener('mouseleave', handleRelease);
+    }
+    updateKeysFromDpad() {
+        // Update keys object based on d-pad state
+        this.keys['ArrowUp'] = this.dpadState.up;
+        this.keys['ArrowDown'] = this.dpadState.down;
+        this.keys['ArrowLeft'] = this.dpadState.left;
+        this.keys['ArrowRight'] = this.dpadState.right;
+        this.keys['w'] = this.dpadState.up;
+        this.keys['W'] = this.dpadState.up;
+        this.keys['s'] = this.dpadState.down;
+        this.keys['S'] = this.dpadState.down;
+        this.keys['a'] = this.dpadState.left;
+        this.keys['A'] = this.dpadState.left;
+        this.keys['d'] = this.dpadState.right;
+        this.keys['D'] = this.dpadState.right;
+    }
+    createActionButton(label, color, onPress, onRelease) {
+        const button = document.createElement('div');
+        button.innerHTML = label;
+        button.style.cssText = `
+      width: 60px;
+      height: 60px;
+      background: ${color};
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    `;
+        const handlePress = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            button.style.transform = 'scale(0.9)';
+            button.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+            onPress();
+        };
+        const handleRelease = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            button.style.transform = 'scale(1)';
+            button.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+            onRelease();
+        };
+        button.addEventListener('touchstart', handlePress, { passive: false });
+        button.addEventListener('touchend', handleRelease, { passive: false });
+        button.addEventListener('touchcancel', handleRelease, { passive: false });
+        button.addEventListener('mousedown', handlePress);
+        button.addEventListener('mouseup', handleRelease);
+        button.addEventListener('mouseleave', handleRelease);
+        return button;
+    }
+    // Action button handlers - subclasses can override
+    onActionButtonPress() {
+        // Simulate space bar press
+        this.keys[' '] = true;
+        this.keys[this.keyMap.FIRE] = true;
+    }
+    onActionButtonRelease() {
+        this.keys[' '] = false;
+        this.keys[this.keyMap.FIRE] = false;
+    }
+    onSecondaryButtonPress() {
+        // Default: no action
+    }
+    onSecondaryButtonRelease() {
+        // Default: no action
     }
     handleKeyDown(event) {
         event.preventDefault();
@@ -145,6 +397,9 @@ class GameEngine {
         if (this.canvas.parentNode) {
             this.canvas.parentNode.removeChild(this.canvas);
         }
+        if (this.mobileControlsContainer && this.mobileControlsContainer.parentNode) {
+            this.mobileControlsContainer.parentNode.removeChild(this.mobileControlsContainer);
+        }
         document.removeEventListener('keydown', this.handleKeyDown.bind(this));
         document.removeEventListener('keyup', this.handleKeyUp.bind(this));
     }
@@ -175,6 +430,29 @@ class Snake extends GameEngine {
         // Set design dimensions for proper scaling
         this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '⟳',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        // Restart game when action button pressed if game over or start game
+        if (this.gameOver) {
+            this.initGame();
+            this.start();
+        }
+        else if (this.gameState === 'waiting') {
+            this.gameState = 'playing';
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
     }
     initGame() {
         this.snake = [{ x: 100, y: 100 }];
@@ -266,6 +544,27 @@ class Snake extends GameEngine {
     update() {
         if (this.gameOver || this.gameState !== 'playing')
             return;
+        // Check for d-pad/keyboard input to change direction
+        if (this.keys['ArrowUp'] || this.keys['w'] || this.keys['W']) {
+            if (this.direction !== Direction$1.DOWN) {
+                this.direction = Direction$1.UP;
+            }
+        }
+        else if (this.keys['ArrowDown'] || this.keys['s'] || this.keys['S']) {
+            if (this.direction !== Direction$1.UP) {
+                this.direction = Direction$1.DOWN;
+            }
+        }
+        else if (this.keys['ArrowLeft'] || this.keys['a'] || this.keys['A']) {
+            if (this.direction !== Direction$1.RIGHT) {
+                this.direction = Direction$1.LEFT;
+            }
+        }
+        else if (this.keys['ArrowRight'] || this.keys['d'] || this.keys['D']) {
+            if (this.direction !== Direction$1.LEFT) {
+                this.direction = Direction$1.RIGHT;
+            }
+        }
         // Only move snake at controlled intervals (frame counting like Tetris)
         this.moveTimer++;
         if (this.moveTimer < this.moveInterval) {
@@ -368,6 +667,27 @@ class Pong extends GameEngine {
         // Set design dimensions for proper scaling
         this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '▶',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'waiting') {
+            this.gameState = 'playing';
+        }
+        else if (this.gameState === 'paused') {
+            this.gameState = 'playing';
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
     }
     initGame() {
         const paddleHeight = 80;
@@ -563,6 +883,27 @@ class Breakout extends GameEngine {
         // Set design dimensions for proper scaling
         this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '▶',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'waiting') {
+            this.launchBall();
+        }
+        else if (this.gameState === 'gameOver' || this.gameState === 'won') {
+            this.initGame();
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
     }
     initGame() {
         this.ball = {
@@ -804,6 +1145,28 @@ class SpaceInvaders extends GameEngine {
         this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
         this.createStars();
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '🔫',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver' || this.gameState === 'won') {
+            this.initGame();
+        }
+        else if (this.shootCooldown <= 0) {
+            this.playerShoot();
+            this.shootCooldown = 20;
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
     }
     createStars() {
         this.stars = [];
@@ -1511,6 +1874,36 @@ class Tetris extends GameEngine {
         this.offsetY = uiHeight - 50; // Position grid after UI area
         this.initGame();
     }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '↻',
+            showSecondaryButton: true,
+            secondaryButtonLabel: '⬇'
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver') {
+            this.initGame();
+        }
+        else if (this.currentPiece) {
+            this.rotatePiece();
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
+    }
+    onSecondaryButtonPress() {
+        // Hard drop
+        if (this.currentPiece && this.gameState === 'playing') {
+            this.dropPiece();
+        }
+    }
+    onSecondaryButtonRelease() {
+        // No action needed
+    }
     initGame() {
         this.grid = Array(this.gridHeight).fill(null).map(() => Array(this.gridWidth).fill(''));
         this.score = 0;
@@ -1812,6 +2205,24 @@ class PacMan extends GameEngine {
         this.cellSize = 14;
         this.frightModeTimer = 0;
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '⟳',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver' || this.gameState === 'won') {
+            this.initGame();
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
     }
     initGame() {
         this.pacman = {
@@ -2171,6 +2582,35 @@ class Asteroids extends GameEngine {
         // Set design dimensions for proper scaling
         this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '🔫',
+            showSecondaryButton: true,
+            secondaryButtonLabel: '🚀'
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver') {
+            this.initGame();
+        }
+        else if (this.shootCooldown <= 0) {
+            this.shoot();
+            this.shootCooldown = 15;
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
+    }
+    onSecondaryButtonPress() {
+        // Thrust
+        this.ship.thrust = true;
+    }
+    onSecondaryButtonRelease() {
+        this.ship.thrust = false;
     }
     initGame() {
         this.ship = {
@@ -2539,6 +2979,24 @@ class Frogger extends GameEngine {
         this.cellSize = 40;
         this.timer = 0;
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '⟳',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver' || this.gameState === 'won') {
+            this.initGame();
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
     }
     initGame() {
         this.frog = {
@@ -2970,6 +3428,28 @@ class DonkeyKong extends GameEngine {
         this.gravity = 0.5;
         this.jumpPower = -12;
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '⬆',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver' || this.gameState === 'won') {
+            this.initGame();
+        }
+        else if (this.mario.onGround && !this.mario.climbing) {
+            this.mario.vy = this.jumpPower;
+            this.mario.onGround = false;
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
     }
     initGame() {
         this.mario = {
@@ -3410,6 +3890,24 @@ class Qbert extends GameEngine {
         this.enemySpawnTimer = 0;
         this.initGame();
     }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '⟳',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver' || this.gameState === 'won') {
+            this.initGame();
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
+    }
     initGame() {
         this.score = 0;
         this.lives = 3;
@@ -3824,6 +4322,24 @@ class Kaboom extends GameEngine {
         this.speedMultiplier = 1;
         this.initGame();
     }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '⟳',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver') {
+            this.initGame();
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
+    }
     initGame() {
         this.bucket = {
             x: this.config.width / 2 - 30,
@@ -4114,6 +4630,27 @@ class Adventure extends GameEngine {
         this.gameState = 'playing';
         this.gameWon = false;
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '⚔️',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver' || this.gameState === 'won') {
+            this.initGame();
+        }
+        else {
+            this.attackDragon();
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
     }
     initGame() {
         this.player = {
@@ -4526,6 +5063,32 @@ class MissileCommand extends GameEngine {
         this.missileSpawnRate = 120;
         this.crosshair = { x: 200, y: 150 };
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '🎯',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver') {
+            this.initGame();
+        }
+        else if (this.gameState === 'levelComplete') {
+            this.level++;
+            this.initLevel();
+            this.gameState = 'playing';
+        }
+        else {
+            this.fireMissile();
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
     }
     initGame() {
         this.score = 0;
@@ -5023,6 +5586,29 @@ class Joust extends GameEngine {
         this.waveComplete = false;
         this.initGame();
     }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '🦅',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver' || this.gameState === 'levelComplete') {
+            this.initGame();
+        }
+        else {
+            // Flap wings
+            this.player.vy = this.flapPower;
+            this.player.flapping = true;
+        }
+    }
+    onActionButtonRelease() {
+        this.player.flapping = false;
+    }
     initGame() {
         this.player = {
             x: this.config.width / 2,
@@ -5474,6 +6060,27 @@ class LunarLander extends GameEngine {
         this.landingScore = 0;
         this.initGame();
     }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '🚀',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'crashed' || this.gameState === 'landed' || this.gameState === 'gameOver') {
+            this.initGame();
+        }
+        else {
+            this.thrusting = true;
+        }
+    }
+    onActionButtonRelease() {
+        this.thrusting = false;
+    }
     initGame() {
         this.lander = {
             x: this.config.width / 2,
@@ -5878,6 +6485,27 @@ class Battlezone extends GameEngine {
         this.camera = { x: 0, y: 0, angle: 0, height: 10 };
         this.horizon = 150;
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '🔫',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver') {
+            this.initGame();
+        }
+        else {
+            this.shoot();
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
     }
     initGame() {
         this.player = {
@@ -6302,6 +6930,27 @@ class Berzerk extends GameEngine {
         this.cellSize = 20;
         this.evilOtto = { active: false, x: 0, y: 0, timer: 0 };
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '🔫',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver' || this.gameState === 'levelComplete') {
+            this.initGame();
+        }
+        else {
+            this.shoot();
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
     }
     initGame() {
         this.player = {
@@ -6918,6 +7567,24 @@ class CircusAtari extends GameEngine {
         this.balloonSpawnRate = 180; // 3 seconds at 60fps
         this.initGame();
     }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '⟳',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver' || this.gameState === 'levelComplete') {
+            this.initGame();
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
+    }
     initGame() {
         // Initialize seesaw in center bottom
         this.seesaw = {
@@ -7416,6 +8083,27 @@ class ElevatorAction extends GameEngine {
         this.floorHeight = 50;
         this.numFloors = 8;
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '🔫',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver' || this.gameState === 'levelComplete') {
+            this.initGame();
+        }
+        else {
+            this.shoot();
+        }
+    }
+    onActionButtonRelease() {
+        // No action needed
     }
     initGame() {
         this.buildingHeight = this.config.height;
@@ -7937,6 +8625,32 @@ class DigDug extends GameEngine {
         this.gameStarted = false; // Track if player has started playing
         this.instructionTimer = 180; // Show instructions for 3 seconds (60 fps * 3)
         this.initGame();
+    }
+    getMobileControlsConfig() {
+        return {
+            controlType: 'dpad',
+            showDpad: true,
+            showActionButton: true,
+            actionButtonLabel: '💨',
+            showSecondaryButton: false,
+            secondaryButtonLabel: ''
+        };
+    }
+    onActionButtonPress() {
+        if (this.gameState === 'gameOver') {
+            this.initGame();
+        }
+        else if (this.gameState === 'levelComplete') {
+            this.level++;
+            this.generateLevel();
+            this.gameState = 'playing';
+        }
+        else {
+            this.startPump();
+        }
+    }
+    onActionButtonRelease() {
+        this.stopPump();
     }
     initGame() {
         this.gridWidth = Math.floor(this.config.width / this.cellSize);

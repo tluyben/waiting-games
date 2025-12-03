@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig, Point } from '../types';
 
 interface Ball extends Point {
@@ -41,6 +41,29 @@ export class Breakout extends GameEngine {
     // Set design dimensions for proper scaling
     this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '▶',
+      showSecondaryButton: false,
+      secondaryButtonLabel: ''
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    if (this.gameState === 'waiting') {
+      this.launchBall();
+    } else if (this.gameState === 'gameOver' || this.gameState === 'won') {
+      this.initGame();
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    // No action needed
   }
 
   private initGame(): void {

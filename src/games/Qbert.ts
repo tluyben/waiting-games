@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 
 interface Cube {
@@ -55,6 +55,27 @@ export class Qbert extends GameEngine {
     };
     super(container, qbertConfig);
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '⟳',
+      showSecondaryButton: false,
+      secondaryButtonLabel: ''
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    if (this.gameState === 'gameOver' || this.gameState === 'won') {
+      this.initGame();
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    // No action needed
   }
 
   private initGame(): void {

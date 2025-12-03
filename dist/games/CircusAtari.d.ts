@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 export declare class CircusAtari extends GameEngine {
     private clowns;
@@ -15,6 +15,9 @@ export declare class CircusAtari extends GameEngine {
     private balloonTimer;
     private balloonSpawnRate;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
     private initGame;
     private updateSeesawPositions;
     private spawnInitialBalloons;

@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig, Point } from '../types';
 
 interface City {
@@ -73,6 +73,33 @@ export class MissileCommand extends GameEngine {
     };
     super(container, missileConfig);
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '🎯',
+      showSecondaryButton: false,
+      secondaryButtonLabel: ''
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    if (this.gameState === 'gameOver') {
+      this.initGame();
+    } else if (this.gameState === 'levelComplete') {
+      this.level++;
+      this.initLevel();
+      this.gameState = 'playing';
+    } else {
+      this.fireMissile();
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    // No action needed
   }
 
   private initGame(): void {

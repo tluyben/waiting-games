@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig, Point } from '../types';
 
 interface Ball extends Point {
@@ -32,6 +32,29 @@ export class Pong extends GameEngine {
     // Set design dimensions for proper scaling
     this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '▶',
+      showSecondaryButton: false,
+      secondaryButtonLabel: ''
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    if (this.gameState === 'waiting') {
+      this.gameState = 'playing';
+    } else if (this.gameState === 'paused') {
+      this.gameState = 'playing';
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    // No action needed
   }
 
   private initGame(): void {

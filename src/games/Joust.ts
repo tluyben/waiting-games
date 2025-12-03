@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 
 interface Bird {
@@ -65,6 +65,31 @@ export class Joust extends GameEngine {
     };
     super(container, joustConfig);
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '🦅',
+      showSecondaryButton: false,
+      secondaryButtonLabel: ''
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    if (this.gameState === 'gameOver' || this.gameState === 'levelComplete') {
+      this.initGame();
+    } else {
+      // Flap wings
+      this.player.vy = this.flapPower;
+      this.player.flapping = true;
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    this.player.flapping = false;
   }
 
   private initGame(): void {

@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig, Point } from '../types';
 
 interface Player {
@@ -76,6 +76,29 @@ export class Berzerk extends GameEngine {
     };
     super(container, berzerkConfig);
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '🔫',
+      showSecondaryButton: false,
+      secondaryButtonLabel: ''
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    if (this.gameState === 'gameOver' || this.gameState === 'levelComplete') {
+      this.initGame();
+    } else {
+      this.shoot();
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    // No action needed
   }
 
   private initGame(): void {

@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig, Point } from '../types';
 
 interface Mario {
@@ -67,6 +67,30 @@ export class DonkeyKong extends GameEngine {
     };
     super(container, dkConfig);
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '⬆',
+      showSecondaryButton: false,
+      secondaryButtonLabel: ''
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    if (this.gameState === 'gameOver' || this.gameState === 'won') {
+      this.initGame();
+    } else if (this.mario.onGround && !this.mario.climbing) {
+      this.mario.vy = this.jumpPower;
+      this.mario.onGround = false;
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    // No action needed
   }
 
   private initGame(): void {

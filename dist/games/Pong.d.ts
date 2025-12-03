@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 export declare class Pong extends GameEngine {
     private ball;
@@ -10,6 +10,9 @@ export declare class Pong extends GameEngine {
     private readonly DESIGN_WIDTH;
     private readonly DESIGN_HEIGHT;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
     private initGame;
     protected handleKeyDown(event: KeyboardEvent): void;
     protected handleKeyUp(event: KeyboardEvent): void;

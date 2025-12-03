@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 export declare class Tetris extends GameEngine {
     private grid;
@@ -15,6 +15,11 @@ export declare class Tetris extends GameEngine {
     private gridHeight;
     private offsetY;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
+    protected onSecondaryButtonPress(): void;
+    protected onSecondaryButtonRelease(): void;
     private initGame;
     private createRandomPiece;
     private shapeToBlocks;

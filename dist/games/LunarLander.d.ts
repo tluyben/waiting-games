@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 export declare class LunarLander extends GameEngine {
     private lander;
@@ -14,6 +14,9 @@ export declare class LunarLander extends GameEngine {
     private speed;
     private landingScore;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
     private initGame;
     private generateTerrain;
     protected handleKeyDown(event: KeyboardEvent): void;

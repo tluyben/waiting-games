@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 export declare class ElevatorAction extends GameEngine {
     private player;
@@ -16,6 +16,9 @@ export declare class ElevatorAction extends GameEngine {
     private floorHeight;
     private numFloors;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
     private initGame;
     private generateBuilding;
     private spawnEnemies;

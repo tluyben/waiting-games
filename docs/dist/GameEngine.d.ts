@@ -1,4 +1,15 @@
 import { GameConfig, GameInstance, KeyMapping } from './types';
+export type MobileControlType = 'dpad' | 'joystick';
+export type ActionButtonType = 'fire' | 'action' | 'none';
+export interface MobileControlsConfig {
+    controlType: MobileControlType;
+    showDpad: boolean;
+    showActionButton: boolean;
+    actionButtonLabel: string;
+    showSecondaryButton: boolean;
+    secondaryButtonLabel: string;
+}
+export declare function isMobileDevice(): boolean;
 export declare abstract class GameEngine implements GameInstance {
     protected canvas: HTMLCanvasElement;
     protected ctx: CanvasRenderingContext2D;
@@ -10,6 +21,16 @@ export declare abstract class GameEngine implements GameInstance {
     protected animationId: number | null;
     protected isRunning: boolean;
     protected isPaused: boolean;
+    protected isMobile: boolean;
+    protected mobileControlsContainer: HTMLDivElement | null;
+    protected dpadState: {
+        up: boolean;
+        down: boolean;
+        left: boolean;
+        right: boolean;
+    };
+    protected actionButtonPressed: boolean;
+    protected secondaryButtonPressed: boolean;
     protected designWidth: number;
     protected designHeight: number;
     protected scale: number;
@@ -22,6 +43,16 @@ export declare abstract class GameEngine implements GameInstance {
     protected get scaledHeight(): number;
     protected setupControls(): void;
     protected setupMobileControls(): void;
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected createMobileControlsOverlay(): void;
+    protected createDpad(): HTMLDivElement;
+    protected setupDpadButton(button: HTMLDivElement, direction: 'up' | 'down' | 'left' | 'right'): void;
+    protected updateKeysFromDpad(): void;
+    protected createActionButton(label: string, color: string, onPress: () => void, onRelease: () => void): HTMLDivElement;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
+    protected onSecondaryButtonPress(): void;
+    protected onSecondaryButtonRelease(): void;
     protected handleKeyDown(event: KeyboardEvent): void;
     protected isKeyPressed(action: keyof KeyMapping, event: KeyboardEvent): boolean;
     protected handleKeyUp(event: KeyboardEvent): void;

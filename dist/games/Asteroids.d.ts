@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 export declare class Asteroids extends GameEngine {
     private ship;
@@ -12,6 +12,11 @@ export declare class Asteroids extends GameEngine {
     private readonly DESIGN_WIDTH;
     private readonly DESIGN_HEIGHT;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
+    protected onSecondaryButtonPress(): void;
+    protected onSecondaryButtonRelease(): void;
     private initGame;
     private createAsteroids;
     private createAsteroid;

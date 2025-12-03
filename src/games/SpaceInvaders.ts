@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig, Point } from '../types';
 
 interface Player {
@@ -67,6 +67,30 @@ export class SpaceInvaders extends GameEngine {
     this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
     this.createStars();
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '🔫',
+      showSecondaryButton: false,
+      secondaryButtonLabel: ''
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    if (this.gameState === 'gameOver' || this.gameState === 'won') {
+      this.initGame();
+    } else if (this.shootCooldown <= 0) {
+      this.playerShoot();
+      this.shootCooldown = 20;
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    // No action needed
   }
 
   private createStars(): void {

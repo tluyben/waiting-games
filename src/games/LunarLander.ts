@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig, Point } from '../types';
 
 interface Lander {
@@ -51,6 +51,29 @@ export class LunarLander extends GameEngine {
     };
     super(container, landerConfig);
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '🚀',
+      showSecondaryButton: false,
+      secondaryButtonLabel: ''
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    if (this.gameState === 'crashed' || this.gameState === 'landed' || this.gameState === 'gameOver') {
+      this.initGame();
+    } else {
+      this.thrusting = true;
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    this.thrusting = false;
   }
 
   private initGame(): void {

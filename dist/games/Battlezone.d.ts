@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 export declare class Battlezone extends GameEngine {
     private player;
@@ -13,6 +13,9 @@ export declare class Battlezone extends GameEngine {
     private camera;
     private horizon;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
     private initGame;
     private generateWorld;
     private spawnEnemyWave;

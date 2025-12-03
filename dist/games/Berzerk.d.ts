@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 export declare class Berzerk extends GameEngine {
     private player;
@@ -15,6 +15,9 @@ export declare class Berzerk extends GameEngine {
     private cellSize;
     private evilOtto;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
     private initGame;
     private generateRoom;
     protected handleKeyDown(event: KeyboardEvent): void;

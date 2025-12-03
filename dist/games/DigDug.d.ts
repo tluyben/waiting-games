@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 export declare class DigDug extends GameEngine {
     private player;
@@ -17,6 +17,9 @@ export declare class DigDug extends GameEngine {
     private gameStarted;
     private instructionTimer;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
     private initGame;
     private generateLevel;
     private digTunnel;

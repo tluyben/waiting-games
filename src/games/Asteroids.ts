@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 
 interface Ship {
@@ -49,6 +49,39 @@ export class Asteroids extends GameEngine {
     // Set design dimensions for proper scaling
     this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '🔫',
+      showSecondaryButton: true,
+      secondaryButtonLabel: '🚀'
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    if (this.gameState === 'gameOver') {
+      this.initGame();
+    } else if (this.shootCooldown <= 0) {
+      this.shoot();
+      this.shootCooldown = 15;
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    // No action needed
+  }
+
+  protected onSecondaryButtonPress(): void {
+    // Thrust
+    this.ship.thrust = true;
+  }
+
+  protected onSecondaryButtonRelease(): void {
+    this.ship.thrust = false;
   }
 
   private initGame(): void {

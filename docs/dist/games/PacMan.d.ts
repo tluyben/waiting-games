@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 export declare class PacMan extends GameEngine {
     private pacman;
@@ -10,6 +10,9 @@ export declare class PacMan extends GameEngine {
     private cellSize;
     private frightModeTimer;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
     private initGame;
     private createDots;
     private isWall;

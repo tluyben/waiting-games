@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 export declare class MissileCommand extends GameEngine {
     private cities;
@@ -13,6 +13,9 @@ export declare class MissileCommand extends GameEngine {
     private missileSpawnRate;
     private crosshair;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
     private initGame;
     private initLevel;
     protected handleKeyDown(event: KeyboardEvent): void;

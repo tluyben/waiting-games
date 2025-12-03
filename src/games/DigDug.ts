@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig, Point } from '../types';
 
 interface Player {
@@ -82,6 +82,33 @@ export class DigDug extends GameEngine {
     };
     super(container, digdugConfig);
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '💨',
+      showSecondaryButton: false,
+      secondaryButtonLabel: ''
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    if (this.gameState === 'gameOver') {
+      this.initGame();
+    } else if (this.gameState === 'levelComplete') {
+      this.level++;
+      this.generateLevel();
+      this.gameState = 'playing';
+    } else {
+      this.startPump();
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    this.stopPump();
   }
 
   private initGame(): void {

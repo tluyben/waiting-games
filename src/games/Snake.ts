@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig, Point } from '../types';
 
 enum Direction {
@@ -28,6 +28,31 @@ export class Snake extends GameEngine {
     // Set design dimensions for proper scaling
     this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
     this.initGame();
+  }
+
+  protected getMobileControlsConfig(): MobileControlsConfig {
+    return {
+      controlType: 'dpad',
+      showDpad: true,
+      showActionButton: true,
+      actionButtonLabel: '⟳',
+      showSecondaryButton: false,
+      secondaryButtonLabel: ''
+    };
+  }
+
+  protected onActionButtonPress(): void {
+    // Restart game when action button pressed if game over or start game
+    if (this.gameOver) {
+      this.initGame();
+      this.start();
+    } else if (this.gameState === 'waiting') {
+      this.gameState = 'playing';
+    }
+  }
+
+  protected onActionButtonRelease(): void {
+    // No action needed
   }
 
   private initGame(): void {
@@ -123,6 +148,25 @@ export class Snake extends GameEngine {
 
   protected update(): void {
     if (this.gameOver || this.gameState !== 'playing') return;
+
+    // Check for d-pad/keyboard input to change direction
+    if (this.keys['ArrowUp'] || this.keys['w'] || this.keys['W']) {
+      if (this.direction !== Direction.DOWN) {
+        this.direction = Direction.UP;
+      }
+    } else if (this.keys['ArrowDown'] || this.keys['s'] || this.keys['S']) {
+      if (this.direction !== Direction.UP) {
+        this.direction = Direction.DOWN;
+      }
+    } else if (this.keys['ArrowLeft'] || this.keys['a'] || this.keys['A']) {
+      if (this.direction !== Direction.RIGHT) {
+        this.direction = Direction.LEFT;
+      }
+    } else if (this.keys['ArrowRight'] || this.keys['d'] || this.keys['D']) {
+      if (this.direction !== Direction.LEFT) {
+        this.direction = Direction.RIGHT;
+      }
+    }
 
     // Only move snake at controlled intervals (frame counting like Tetris)
     this.moveTimer++;

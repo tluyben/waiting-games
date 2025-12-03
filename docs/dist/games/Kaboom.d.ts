@@ -1,4 +1,4 @@
-import { GameEngine } from '../GameEngine';
+import { GameEngine, MobileControlsConfig } from '../GameEngine';
 import { GameConfig } from '../types';
 export declare class Kaboom extends GameEngine {
     private bucket;
@@ -12,6 +12,9 @@ export declare class Kaboom extends GameEngine {
     private bombSpawnRate;
     private speedMultiplier;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected getMobileControlsConfig(): MobileControlsConfig;
+    protected onActionButtonPress(): void;
+    protected onActionButtonRelease(): void;
     private initGame;
     protected handleKeyDown(event: KeyboardEvent): void;
     protected handleKeyUp(event: KeyboardEvent): void;
