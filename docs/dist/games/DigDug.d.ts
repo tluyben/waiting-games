@@ -14,6 +14,8 @@ export declare class DigDug extends GameEngine {
     private cellSize;
     private gridWidth;
     private gridHeight;
+    private gameStarted;
+    private instructionTimer;
     constructor(container: HTMLElement | string, config?: GameConfig);
     private initGame;
     private generateLevel;

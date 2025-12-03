@@ -7826,6 +7826,8 @@ class DigDug extends GameEngine {
         this.cellSize = 16;
         this.gridWidth = 0;
         this.gridHeight = 0;
+        this.gameStarted = false; // Track if player has started playing
+        this.instructionTimer = 180; // Show instructions for 3 seconds (60 fps * 3)
         this.initGame();
     }
     initGame() {
@@ -7850,25 +7852,40 @@ class DigDug extends GameEngine {
         this.lives = 3;
         this.level = 1;
         this.gameState = 'playing';
+        this.gameStarted = false;
+        this.instructionTimer = 180;
         this.generateLevel();
     }
     generateLevel() {
-        // Initialize grid with dirt
+        // Initialize grid with dirt - top 2 rows are sky/surface
         this.grid = [];
+        const skyRows = 2;
         for (let x = 0; x < this.gridWidth; x++) {
             this.grid[x] = [];
             for (let y = 0; y < this.gridHeight; y++) {
-                this.grid[x][y] = y > 0; // Top row is always air
+                this.grid[x][y] = y >= skyRows; // Top rows are sky
             }
         }
-        // Create starting tunnel
-        this.digTunnel(0, 1, 4, 1);
-        // Generate enemies
-        const enemyCount = 2 + this.level;
+        // Create starting tunnel from surface going down
+        const startX = Math.floor(this.gridWidth / 4);
+        this.digTunnel(startX, skyRows, 1, 3);
+        // Reset player position to surface
+        this.player.x = startX * this.cellSize;
+        this.player.y = skyRows * this.cellSize;
+        // Clear old enemies and rocks
+        this.enemies = [];
+        this.rocks = [];
+        // Generate enemies in deeper areas
+        const enemyCount = Math.min(2 + this.level, 6);
+        const minEnemyY = skyRows + 4; // Enemies start deeper
         for (let i = 0; i < enemyCount; i++) {
             const type = Math.random() < 0.6 ? 'pooka' : 'fygar';
-            const x = (2 + Math.random() * (this.gridWidth - 4)) * this.cellSize;
-            const y = (3 + Math.random() * (this.gridHeight - 5)) * this.cellSize;
+            const gridX = Math.floor(2 + Math.random() * (this.gridWidth - 4));
+            const gridY = Math.floor(minEnemyY + Math.random() * (this.gridHeight - minEnemyY - 2));
+            const x = gridX * this.cellSize;
+            const y = gridY * this.cellSize;
+            // Dig small pocket for enemy
+            this.digTunnel(gridX, gridY, 1, 1);
             this.enemies.push({
                 x: x,
                 y: y,
@@ -7888,11 +7905,13 @@ class DigDug extends GameEngine {
                 ghostTimer: 0
             });
         }
-        // Generate rocks
-        const rockCount = 3 + Math.floor(this.level / 2);
+        // Generate rocks in upper-middle area
+        const rockCount = Math.min(2 + Math.floor(this.level / 2), 5);
         for (let i = 0; i < rockCount; i++) {
-            const x = (1 + Math.random() * (this.gridWidth - 2)) * this.cellSize;
-            const y = (2 + Math.random() * (this.gridHeight / 2)) * this.cellSize;
+            const gridX = Math.floor(1 + Math.random() * (this.gridWidth - 2));
+            const gridY = Math.floor(skyRows + 2 + Math.random() * (this.gridHeight / 3));
+            const x = gridX * this.cellSize;
+            const y = gridY * this.cellSize;
             this.rocks.push({
                 x: x,
                 y: y,
@@ -7967,6 +7986,7 @@ class DigDug extends GameEngine {
         const deltaX = x - playerCenterX;
         const deltaY = y - playerCenterY;
         // Determine direction or pump
+        this.gameStarted = true;
         if (Math.abs(deltaX) < 30 && Math.abs(deltaY) < 30) {
             this.startPump();
         }
@@ -7992,6 +8012,7 @@ class DigDug extends GameEngine {
     startPump() {
         if (this.pump || this.player.pumpCooldown > 0)
             return;
+        this.gameStarted = true;
         this.player.pumping = true;
         let targetX = this.player.x;
         let targetY = this.player.y;
@@ -8035,21 +8056,25 @@ class DigDug extends GameEngine {
         if (this.config.useKeyboard) {
             this.player.vx = 0;
             this.player.vy = 0;
-            if (this.keys[this.keyMap.LEFT] || this.keys['a'] || this.keys['A']) {
+            if (this.keys[this.keyMap.LEFT] || this.keys['a'] || this.keys['A'] || this.keys['ArrowLeft']) {
                 this.player.vx = -1;
                 this.player.facing = 'left';
+                this.gameStarted = true;
             }
-            if (this.keys[this.keyMap.RIGHT] || this.keys['d'] || this.keys['D']) {
+            if (this.keys[this.keyMap.RIGHT] || this.keys['d'] || this.keys['D'] || this.keys['ArrowRight']) {
                 this.player.vx = 1;
                 this.player.facing = 'right';
+                this.gameStarted = true;
             }
-            if (this.keys[this.keyMap.UP] || this.keys['w'] || this.keys['W']) {
+            if (this.keys[this.keyMap.UP] || this.keys['w'] || this.keys['W'] || this.keys['ArrowUp']) {
                 this.player.vy = -1;
                 this.player.facing = 'up';
+                this.gameStarted = true;
             }
-            if (this.keys[this.keyMap.DOWN] || this.keys['s'] || this.keys['S']) {
+            if (this.keys[this.keyMap.DOWN] || this.keys['s'] || this.keys['S'] || this.keys['ArrowDown']) {
                 this.player.vy = 1;
                 this.player.facing = 'down';
+                this.gameStarted = true;
             }
         }
         // Apply movement
@@ -8243,6 +8268,10 @@ class DigDug extends GameEngine {
     update() {
         if (this.gameState !== 'playing')
             return;
+        // Decrease instruction timer
+        if (this.instructionTimer > 0) {
+            this.instructionTimer--;
+        }
         this.updatePlayer();
         this.updateEnemies();
         this.updatePump();
@@ -8253,25 +8282,72 @@ class DigDug extends GameEngine {
         }
     }
     render() {
-        // Background
+        const skyRows = 2;
+        // Sky background (light blue)
+        this.ctx.fillStyle = '#87CEEB';
+        this.ctx.fillRect(0, 0, this.config.width, skyRows * this.cellSize);
+        // Underground background (dark)
         this.ctx.fillStyle = '#1a1a1a';
-        this.ctx.fillRect(0, 0, this.config.width, this.config.height);
-        // Draw dirt
-        this.ctx.fillStyle = '#8B4513';
+        this.ctx.fillRect(0, skyRows * this.cellSize, this.config.width, this.config.height - skyRows * this.cellSize);
+        // Draw dirt with depth-based colors (authentic Dig Dug layers)
         for (let x = 0; x < this.gridWidth; x++) {
             for (let y = 0; y < this.gridHeight; y++) {
                 if (this.grid[x][y]) {
+                    // Different dirt colors based on depth
+                    const depth = y - skyRows;
+                    if (depth < 4) {
+                        this.ctx.fillStyle = '#C4A35A'; // Light brown/tan (top layer)
+                    }
+                    else if (depth < 8) {
+                        this.ctx.fillStyle = '#8B6914'; // Medium brown
+                    }
+                    else if (depth < 14) {
+                        this.ctx.fillStyle = '#A0522D'; // Sienna
+                    }
+                    else {
+                        this.ctx.fillStyle = '#654321'; // Dark brown (deep)
+                    }
                     this.ctx.fillRect(x * this.cellSize, y * this.cellSize, this.cellSize, this.cellSize);
+                    // Add subtle texture
+                    this.ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                    if ((x + y) % 3 === 0) {
+                        this.ctx.fillRect(x * this.cellSize + 2, y * this.cellSize + 2, 3, 3);
+                    }
                 }
             }
         }
-        // Draw tunnels (slightly different color)
-        this.ctx.fillStyle = '#654321';
+        // Draw grass on top of dirt
+        this.ctx.fillStyle = '#228B22';
         for (let x = 0; x < this.gridWidth; x++) {
-            for (let y = 0; y < this.gridHeight; y++) {
-                if (!this.grid[x][y] && y > 0) {
-                    this.ctx.strokeStyle = '#8B4513';
-                    this.ctx.lineWidth = 1;
+            if (this.grid[x][skyRows]) {
+                // Grass line
+                this.ctx.fillRect(x * this.cellSize, skyRows * this.cellSize - 3, this.cellSize, 3);
+                // Grass blades
+                for (let blade = 0; blade < 3; blade++) {
+                    const bladeX = x * this.cellSize + blade * 5 + 2;
+                    this.ctx.fillRect(bladeX, skyRows * this.cellSize - 6, 2, 6);
+                }
+            }
+        }
+        // Draw flowers on surface (decorative)
+        for (let x = 2; x < this.gridWidth; x += 5) {
+            if (this.grid[x][skyRows]) {
+                // Flower stem
+                this.ctx.fillStyle = '#228B22';
+                this.ctx.fillRect(x * this.cellSize + 7, skyRows * this.cellSize - 12, 2, 10);
+                // Flower head
+                this.ctx.fillStyle = ['#FF6B6B', '#FFFF00', '#FF69B4', '#FFA500'][x % 4];
+                this.ctx.beginPath();
+                this.ctx.arc(x * this.cellSize + 8, skyRows * this.cellSize - 14, 4, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+        }
+        // Draw tunnel outlines for visibility
+        this.ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)';
+        this.ctx.lineWidth = 1;
+        for (let x = 0; x < this.gridWidth; x++) {
+            for (let y = skyRows; y < this.gridHeight; y++) {
+                if (!this.grid[x][y]) {
                     this.ctx.strokeRect(x * this.cellSize, y * this.cellSize, this.cellSize, this.cellSize);
                 }
             }
@@ -8287,25 +8363,104 @@ class DigDug extends GameEngine {
         }
         // Draw enemies
         for (const enemy of this.enemies) {
-            const size = enemy.width + enemy.inflated * 4;
+            const inflateScale = 1 + enemy.inflated * 0.3;
+            const size = enemy.width * inflateScale;
             const offsetX = (size - enemy.width) / 2;
             const offsetY = (size - enemy.height) / 2;
-            // Enemy body
-            this.ctx.fillStyle = enemy.ghost ? `${enemy.color}80` : enemy.color;
-            this.ctx.fillRect(enemy.x - offsetX, enemy.y - offsetY, size, size);
-            // Enemy eyes
-            this.ctx.fillStyle = '#FFFFFF';
-            this.ctx.fillRect(enemy.x + 2, enemy.y + 2, 3, 3);
-            this.ctx.fillRect(enemy.x + enemy.width - 5, enemy.y + 2, 3, 3);
-            // Enemy pupils
-            this.ctx.fillStyle = '#000000';
-            this.ctx.fillRect(enemy.x + 3, enemy.y + 3, 1, 1);
-            this.ctx.fillRect(enemy.x + enemy.width - 4, enemy.y + 3, 1, 1);
-            // Fygar fire breath
-            if (enemy.type === 'fygar' && Math.random() < 0.1) {
-                this.ctx.fillStyle = '#FF4500';
-                this.ctx.fillRect(enemy.x + enemy.width, enemy.y + 4, 8, 6);
+            const ex = enemy.x - offsetX;
+            const ey = enemy.y - offsetY;
+            // Ghost mode transparency
+            const alpha = enemy.ghost ? 0.5 : 1;
+            this.ctx.globalAlpha = alpha;
+            if (enemy.type === 'pooka') {
+                // Pooka - round red creature with goggles
+                // Body (red/orange, round)
+                this.ctx.fillStyle = '#FF6347';
+                this.ctx.beginPath();
+                this.ctx.arc(ex + size / 2, ey + size / 2, size / 2, 0, Math.PI * 2);
+                this.ctx.fill();
+                // Goggles strap (yellow)
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.fillRect(ex + 2, ey + size / 3, size - 4, 3);
+                // Goggle lenses (white circles)
+                this.ctx.fillStyle = '#FFFFFF';
+                this.ctx.beginPath();
+                this.ctx.arc(ex + size / 3, ey + size / 3 + 1, 4, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.arc(ex + size * 2 / 3, ey + size / 3 + 1, 4, 0, Math.PI * 2);
+                this.ctx.fill();
+                // Pupils
+                this.ctx.fillStyle = '#000000';
+                this.ctx.beginPath();
+                this.ctx.arc(ex + size / 3, ey + size / 3 + 1, 2, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.arc(ex + size * 2 / 3, ey + size / 3 + 1, 2, 0, Math.PI * 2);
+                this.ctx.fill();
+                // Inflation effect
+                if (enemy.inflated > 2) {
+                    this.ctx.fillStyle = '#FFA07A';
+                    this.ctx.beginPath();
+                    this.ctx.arc(ex + size / 2, ey + size / 2, size / 2 - 2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
             }
+            else {
+                // Fygar - green dragon
+                // Body (green, rectangular with pointed head)
+                this.ctx.fillStyle = '#32CD32';
+                this.ctx.fillRect(ex + 2, ey + 4, size - 4, size - 6);
+                // Head (triangle-ish)
+                this.ctx.beginPath();
+                this.ctx.moveTo(ex + size - 2, ey + 4);
+                this.ctx.lineTo(ex + size + 4, ey + size / 2);
+                this.ctx.lineTo(ex + size - 2, ey + size - 2);
+                this.ctx.closePath();
+                this.ctx.fill();
+                // Eyes (yellow)
+                this.ctx.fillStyle = '#FFFF00';
+                this.ctx.fillRect(ex + 4, ey + 6, 4, 4);
+                this.ctx.fillRect(ex + size - 10, ey + 6, 4, 4);
+                // Pupils
+                this.ctx.fillStyle = '#000000';
+                this.ctx.fillRect(ex + 5, ey + 7, 2, 2);
+                this.ctx.fillRect(ex + size - 9, ey + 7, 2, 2);
+                // Spikes on back
+                this.ctx.fillStyle = '#228B22';
+                for (let spike = 0; spike < 3; spike++) {
+                    const spikeX = ex + 4 + spike * 4;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(spikeX, ey + 4);
+                    this.ctx.lineTo(spikeX + 2, ey);
+                    this.ctx.lineTo(spikeX + 4, ey + 4);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                }
+                // Fire breath (random chance when not inflated)
+                if (enemy.inflated < 1 && Math.random() < 0.05) {
+                    this.ctx.fillStyle = '#FF4500';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(ex + size + 4, ey + size / 2 - 3);
+                    this.ctx.lineTo(ex + size + 16, ey + size / 2);
+                    this.ctx.lineTo(ex + size + 4, ey + size / 2 + 3);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(ex + size + 4, ey + size / 2 - 2);
+                    this.ctx.lineTo(ex + size + 10, ey + size / 2);
+                    this.ctx.lineTo(ex + size + 4, ey + size / 2 + 2);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                }
+                // Inflation effect
+                if (enemy.inflated > 2) {
+                    this.ctx.fillStyle = '#90EE90';
+                    this.ctx.fillRect(ex + 4, ey + 6, size - 8, size - 10);
+                }
+            }
+            this.ctx.globalAlpha = 1;
         }
         // Draw pump
         if (this.pump) {
@@ -8321,43 +8476,78 @@ class DigDug extends GameEngine {
             this.ctx.arc(this.pump.x, this.pump.y, 3, 0, Math.PI * 2);
             this.ctx.fill();
         }
-        // Draw player
-        this.ctx.fillStyle = '#0000FF';
-        this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
-        // Player face
+        // Draw player (Dig Dug style - white suit with blue accents)
+        const px = this.player.x;
+        const py = this.player.y;
+        const pw = this.player.width;
+        const ph = this.player.height;
+        // Body (white suit)
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(px + 2, py + 4, pw - 4, ph - 4);
+        // Helmet/head (blue)
+        this.ctx.fillStyle = '#4169E1';
+        this.ctx.beginPath();
+        this.ctx.arc(px + pw / 2, py + 4, 5, 0, Math.PI * 2);
+        this.ctx.fill();
+        // Face
         this.ctx.fillStyle = '#FFDBAC';
-        this.ctx.fillRect(this.player.x + 2, this.player.y + 2, this.player.width - 4, this.player.height / 2);
-        // Player eyes
+        this.ctx.fillRect(px + 4, py + 2, pw - 8, 5);
+        // Eyes (direction based)
         this.ctx.fillStyle = '#000000';
-        this.ctx.fillRect(this.player.x + 3, this.player.y + 4, 2, 2);
-        this.ctx.fillRect(this.player.x + this.player.width - 5, this.player.y + 4, 2, 2);
-        // Player direction indicator
-        this.ctx.fillStyle = '#FFFFFF';
-        let dirX = this.player.x + this.player.width / 2;
-        let dirY = this.player.y + this.player.height / 2;
-        switch (this.player.facing) {
-            case 'up':
-                dirY -= 6;
-                break;
-            case 'down':
-                dirY += 6;
-                break;
-            case 'left':
-                dirX -= 6;
-                break;
-            case 'right':
-                dirX += 6;
-                break;
+        if (this.player.facing === 'left') {
+            this.ctx.fillRect(px + 3, py + 3, 2, 2);
+            this.ctx.fillRect(px + 6, py + 3, 2, 2);
         }
-        this.ctx.fillRect(dirX - 1, dirY - 1, 2, 2);
-        // HUD
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.font = '16px Arial';
+        else if (this.player.facing === 'right') {
+            this.ctx.fillRect(px + pw - 5, py + 3, 2, 2);
+            this.ctx.fillRect(px + pw - 8, py + 3, 2, 2);
+        }
+        else {
+            this.ctx.fillRect(px + 4, py + 3, 2, 2);
+            this.ctx.fillRect(px + pw - 6, py + 3, 2, 2);
+        }
+        // Blue boots
+        this.ctx.fillStyle = '#4169E1';
+        this.ctx.fillRect(px + 2, py + ph - 4, 4, 4);
+        this.ctx.fillRect(px + pw - 6, py + ph - 4, 4, 4);
+        // Pump/weapon when pumping
+        if (this.player.pumping || this.pump) {
+            this.ctx.fillStyle = '#FFD700';
+            switch (this.player.facing) {
+                case 'right':
+                    this.ctx.fillRect(px + pw, py + ph / 2 - 1, 6, 3);
+                    break;
+                case 'left':
+                    this.ctx.fillRect(px - 6, py + ph / 2 - 1, 6, 3);
+                    break;
+                case 'up':
+                    this.ctx.fillRect(px + pw / 2 - 1, py - 6, 3, 6);
+                    break;
+                case 'down':
+                    this.ctx.fillRect(px + pw / 2 - 1, py + ph, 3, 6);
+                    break;
+            }
+        }
+        // HUD - positioned in sky area with retro styling
+        this.ctx.fillStyle = '#000000';
+        this.ctx.font = 'bold 12px Arial';
         this.ctx.textAlign = 'left';
-        this.ctx.fillText(`Score: ${this.score}`, 10, 25);
-        this.ctx.fillText(`Lives: ${this.lives}`, 10, 45);
-        this.ctx.fillText(`Level: ${this.level}`, 10, 65);
-        this.ctx.fillText(`Enemies: ${this.enemies.length}`, 10, 85);
+        // Score (top left)
+        this.ctx.fillText(`SCORE: ${this.score}`, 8, 14);
+        // Lives (show remaining lives as icons)
+        this.ctx.fillText('LIVES:', 8, 28);
+        for (let i = 0; i < this.lives; i++) {
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.fillRect(55 + i * 12, 20, 8, 10);
+            this.ctx.fillStyle = '#4169E1';
+            this.ctx.fillRect(56 + i * 12, 21, 6, 4);
+        }
+        this.ctx.fillStyle = '#000000';
+        // Level (top right)
+        this.ctx.textAlign = 'right';
+        this.ctx.fillText(`LEVEL: ${this.level}`, this.config.width - 8, 14);
+        this.ctx.fillText(`ENEMIES: ${this.enemies.length}`, this.config.width - 8, 28);
+        this.ctx.textAlign = 'left';
         if (this.gameState === 'gameOver') {
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             this.ctx.fillRect(0, 0, this.config.width, this.config.height);
@@ -8384,18 +8574,26 @@ class DigDug extends GameEngine {
             this.ctx.fillText('Press SPACE or tap for next level', this.config.width / 2, this.config.height / 2 + 50);
             this.ctx.textAlign = 'left';
         }
-        else if (this.score === 0) {
-            // Instructions
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-            this.ctx.fillRect(20, this.config.height - 140, this.config.width - 40, 120);
+        else if (!this.gameStarted && this.instructionTimer > 0) {
+            // Instructions - show only before player starts and with fade out
+            const alpha = Math.min(0.8, this.instructionTimer / 60); // Fade out over last second
+            this.ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+            this.ctx.fillRect(this.config.width / 2 - 160, this.config.height / 2 - 70, 320, 140);
+            // Border
+            this.ctx.strokeStyle = '#FFFF00';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(this.config.width / 2 - 160, this.config.height / 2 - 70, 320, 140);
             this.ctx.fillStyle = '#FFFFFF';
-            this.ctx.font = '14px Arial';
+            this.ctx.font = 'bold 16px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('Dig tunnels and defeat enemies with your pump!', this.config.width / 2, this.config.height - 115);
-            this.ctx.fillText('Move: WASD or arrows', this.config.width / 2, this.config.height - 95);
-            this.ctx.fillText('Pump: Space (hold to inflate enemies)', this.config.width / 2, this.config.height - 75);
-            this.ctx.fillText('Watch out for falling rocks!', this.config.width / 2, this.config.height - 55);
-            this.ctx.fillText('Eliminate all enemies to advance', this.config.width / 2, this.config.height - 35);
+            this.ctx.fillText('DIG DUG', this.config.width / 2, this.config.height / 2 - 45);
+            this.ctx.font = '12px Arial';
+            this.ctx.fillStyle = '#FFFF00';
+            this.ctx.fillText('Dig tunnels and defeat enemies!', this.config.width / 2, this.config.height / 2 - 20);
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.fillText('Move: WASD or Arrow keys', this.config.width / 2, this.config.height / 2 + 5);
+            this.ctx.fillText('Pump: Space (hold to inflate)', this.config.width / 2, this.config.height / 2 + 25);
+            this.ctx.fillText('Watch for falling rocks!', this.config.width / 2, this.config.height / 2 + 45);
             this.ctx.textAlign = 'left';
         }
     }
