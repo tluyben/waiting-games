@@ -42,8 +42,8 @@ export class Kaboom extends GameEngine {
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     const kaboomConfig = {
       ...config,
-      width: config.width || 400,
-      height: config.height || 500
+      width: config.width || 500,
+      height: config.height || 600
     };
     super(container, kaboomConfig);
     this.initGame();

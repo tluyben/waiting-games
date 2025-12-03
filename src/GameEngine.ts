@@ -22,8 +22,8 @@ export abstract class GameEngine implements GameInstance {
     this.config = {
       useKeyboard: true,
       useMobile: false,
-      width: 400,
-      height: 300,
+      width: 600,
+      height: 400,
       theme: 'classic',
       keys: {},
       ...config

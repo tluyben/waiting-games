@@ -71,8 +71,8 @@ export class Berzerk extends GameEngine {
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     const berzerkConfig = {
       ...config,
-      width: config.width || 520,
-      height: config.height || 360
+      width: config.width || 600,
+      height: config.height || 400
     };
     super(container, berzerkConfig);
     this.initGame();

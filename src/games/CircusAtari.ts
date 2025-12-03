@@ -63,8 +63,8 @@ export class CircusAtari extends GameEngine {
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     const circusConfig = {
       ...config,
-      width: config.width || 500,
-      height: config.height || 400
+      width: config.width || 600,
+      height: config.height || 450
     };
     super(container, circusConfig);
     this.initGame();

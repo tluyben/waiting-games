@@ -68,8 +68,8 @@ export class MissileCommand extends GameEngine {
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     const missileConfig = {
       ...config,
-      width: config.width || 500,
-      height: config.height || 400
+      width: config.width || 600,
+      height: config.height || 450
     };
     super(container, missileConfig);
     this.initGame();

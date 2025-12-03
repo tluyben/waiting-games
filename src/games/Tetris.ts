@@ -77,7 +77,12 @@ export class Tetris extends GameEngine {
   private offsetY: number;
 
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
-    super(container, config);
+    const tetrisConfig = {
+      ...config,
+      width: config.width || 300,
+      height: config.height || 500
+    };
+    super(container, tetrisConfig);
     // Calculate block size to fit the grid within the canvas height
     // Reserve space for UI at top (60px for score/lines/level) and bottom margin (10px)
     const uiHeight = 70;

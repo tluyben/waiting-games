@@ -19,8 +19,8 @@
             this.config = {
                 useKeyboard: true,
                 useMobile: false,
-                width: 400,
-                height: 300,
+                width: 600,
+                height: 400,
                 theme: 'classic',
                 keys: {},
                 ...config
@@ -1405,7 +1405,12 @@
     };
     class Tetris extends GameEngine {
         constructor(container, config = {}) {
-            super(container, config);
+            const tetrisConfig = {
+                ...config,
+                width: config.width || 300,
+                height: config.height || 500
+            };
+            super(container, tetrisConfig);
             this.currentPiece = null;
             this.nextPiece = null;
             this.score = 0;
@@ -2426,8 +2431,8 @@
         constructor(container, config = {}) {
             const froggerConfig = {
                 ...config,
-                width: config.width || 13 * 32,
-                height: config.height || 14 * 32
+                width: config.width || 13 * 40,
+                height: config.height || 14 * 40
             };
             super(container, froggerConfig);
             this.vehicles = [];
@@ -2437,7 +2442,7 @@
             this.lives = 3;
             this.time = 60;
             this.gameState = 'playing';
-            this.cellSize = 32;
+            this.cellSize = 40;
             this.timer = 0;
             this.initGame();
         }
@@ -2857,8 +2862,8 @@
         constructor(container, config = {}) {
             const dkConfig = {
                 ...config,
-                width: config.width || 400,
-                height: config.height || 500
+                width: config.width || 500,
+                height: config.height || 600
             };
             super(container, dkConfig);
             this.platforms = [];
@@ -3295,8 +3300,8 @@
         constructor(container, config = {}) {
             const qbertConfig = {
                 ...config,
-                width: config.width || 450,
-                height: config.height || 400
+                width: config.width || 600,
+                height: config.height || 450
             };
             super(container, qbertConfig);
             this.cubes = [];
@@ -3710,8 +3715,8 @@
         constructor(container, config = {}) {
             const kaboomConfig = {
                 ...config,
-                width: config.width || 400,
-                height: config.height || 500
+                width: config.width || 500,
+                height: config.height || 600
             };
             super(container, kaboomConfig);
             this.bombs = [];
@@ -4005,8 +4010,8 @@
         constructor(container, config = {}) {
             const adventureConfig = {
                 ...config,
-                width: config.width || 400,
-                height: config.height || 300
+                width: config.width || 600,
+                height: config.height || 400
             };
             super(container, adventureConfig);
             this.rooms = [];
@@ -4411,8 +4416,8 @@
         constructor(container, config = {}) {
             const missileConfig = {
                 ...config,
-                width: config.width || 500,
-                height: config.height || 400
+                width: config.width || 600,
+                height: config.height || 450
             };
             super(container, missileConfig);
             this.cities = [];
@@ -6186,8 +6191,8 @@
         constructor(container, config = {}) {
             const berzerkConfig = {
                 ...config,
-                width: config.width || 520,
-                height: config.height || 360
+                width: config.width || 600,
+                height: config.height || 400
             };
             super(container, berzerkConfig);
             this.robots = [];
@@ -6801,8 +6806,8 @@
         constructor(container, config = {}) {
             const circusConfig = {
                 ...config,
-                width: config.width || 500,
-                height: config.height || 400
+                width: config.width || 600,
+                height: config.height || 450
             };
             super(container, circusConfig);
             this.clowns = [];
@@ -7819,8 +7824,8 @@
         constructor(container, config = {}) {
             const digdugConfig = {
                 ...config,
-                width: config.width || 512,
-                height: config.height || 384
+                width: config.width || 608,
+                height: config.height || 448
             };
             super(container, digdugConfig);
             this.enemies = [];

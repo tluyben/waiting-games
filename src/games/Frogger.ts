@@ -40,14 +40,14 @@ export class Frogger extends GameEngine {
   private lives = 3;
   private time = 60;
   private gameState: 'playing' | 'gameOver' | 'won' = 'playing';
-  private cellSize = 32;
+  private cellSize = 40;
   private timer = 0;
 
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     const froggerConfig = {
       ...config,
-      width: config.width || 13 * 32,
-      height: config.height || 14 * 32
+      width: config.width || 13 * 40,
+      height: config.height || 14 * 40
     };
     super(container, froggerConfig);
     this.initGame();

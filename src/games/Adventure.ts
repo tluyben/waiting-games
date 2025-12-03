@@ -57,8 +57,8 @@ export class Adventure extends GameEngine {
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     const adventureConfig = {
       ...config,
-      width: config.width || 400,
-      height: config.height || 300
+      width: config.width || 600,
+      height: config.height || 400
     };
     super(container, adventureConfig);
     this.initGame();

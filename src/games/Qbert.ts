@@ -50,8 +50,8 @@ export class Qbert extends GameEngine {
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     const qbertConfig = {
       ...config,
-      width: config.width || 450,
-      height: config.height || 400
+      width: config.width || 600,
+      height: config.height || 450
     };
     super(container, qbertConfig);
     this.initGame();

@@ -77,8 +77,8 @@ export class DigDug extends GameEngine {
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     const digdugConfig = {
       ...config,
-      width: config.width || 512,
-      height: config.height || 384
+      width: config.width || 608,
+      height: config.height || 448
     };
     super(container, digdugConfig);
     this.initGame();

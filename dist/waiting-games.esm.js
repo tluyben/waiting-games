@@ -15,8 +15,8 @@ class GameEngine {
         this.config = {
             useKeyboard: true,
             useMobile: false,
-            width: 400,
-            height: 300,
+            width: 600,
+            height: 400,
             theme: 'classic',
             keys: {},
             ...config
@@ -1401,7 +1401,12 @@ const COLORS = {
 };
 class Tetris extends GameEngine {
     constructor(container, config = {}) {
-        super(container, config);
+        const tetrisConfig = {
+            ...config,
+            width: config.width || 300,
+            height: config.height || 500
+        };
+        super(container, tetrisConfig);
         this.currentPiece = null;
         this.nextPiece = null;
         this.score = 0;
@@ -2422,8 +2427,8 @@ class Frogger extends GameEngine {
     constructor(container, config = {}) {
         const froggerConfig = {
             ...config,
-            width: config.width || 13 * 32,
-            height: config.height || 14 * 32
+            width: config.width || 13 * 40,
+            height: config.height || 14 * 40
         };
         super(container, froggerConfig);
         this.vehicles = [];
@@ -2433,7 +2438,7 @@ class Frogger extends GameEngine {
         this.lives = 3;
         this.time = 60;
         this.gameState = 'playing';
-        this.cellSize = 32;
+        this.cellSize = 40;
         this.timer = 0;
         this.initGame();
     }
@@ -2853,8 +2858,8 @@ class DonkeyKong extends GameEngine {
     constructor(container, config = {}) {
         const dkConfig = {
             ...config,
-            width: config.width || 400,
-            height: config.height || 500
+            width: config.width || 500,
+            height: config.height || 600
         };
         super(container, dkConfig);
         this.platforms = [];
@@ -3291,8 +3296,8 @@ class Qbert extends GameEngine {
     constructor(container, config = {}) {
         const qbertConfig = {
             ...config,
-            width: config.width || 450,
-            height: config.height || 400
+            width: config.width || 600,
+            height: config.height || 450
         };
         super(container, qbertConfig);
         this.cubes = [];
@@ -3706,8 +3711,8 @@ class Kaboom extends GameEngine {
     constructor(container, config = {}) {
         const kaboomConfig = {
             ...config,
-            width: config.width || 400,
-            height: config.height || 500
+            width: config.width || 500,
+            height: config.height || 600
         };
         super(container, kaboomConfig);
         this.bombs = [];
@@ -4001,8 +4006,8 @@ class Adventure extends GameEngine {
     constructor(container, config = {}) {
         const adventureConfig = {
             ...config,
-            width: config.width || 400,
-            height: config.height || 300
+            width: config.width || 600,
+            height: config.height || 400
         };
         super(container, adventureConfig);
         this.rooms = [];
@@ -4407,8 +4412,8 @@ class MissileCommand extends GameEngine {
     constructor(container, config = {}) {
         const missileConfig = {
             ...config,
-            width: config.width || 500,
-            height: config.height || 400
+            width: config.width || 600,
+            height: config.height || 450
         };
         super(container, missileConfig);
         this.cities = [];
@@ -6182,8 +6187,8 @@ class Berzerk extends GameEngine {
     constructor(container, config = {}) {
         const berzerkConfig = {
             ...config,
-            width: config.width || 520,
-            height: config.height || 360
+            width: config.width || 600,
+            height: config.height || 400
         };
         super(container, berzerkConfig);
         this.robots = [];
@@ -6797,8 +6802,8 @@ class CircusAtari extends GameEngine {
     constructor(container, config = {}) {
         const circusConfig = {
             ...config,
-            width: config.width || 500,
-            height: config.height || 400
+            width: config.width || 600,
+            height: config.height || 450
         };
         super(container, circusConfig);
         this.clowns = [];
@@ -7815,8 +7820,8 @@ class DigDug extends GameEngine {
     constructor(container, config = {}) {
         const digdugConfig = {
             ...config,
-            width: config.width || 512,
-            height: config.height || 384
+            width: config.width || 608,
+            height: config.height || 448
         };
         super(container, digdugConfig);
         this.enemies = [];

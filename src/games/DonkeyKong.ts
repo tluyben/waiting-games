@@ -62,8 +62,8 @@ export class DonkeyKong extends GameEngine {
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     const dkConfig = {
       ...config,
-      width: config.width || 400,
-      height: config.height || 500
+      width: config.width || 500,
+      height: config.height || 600
     };
     super(container, dkConfig);
     this.initGame();
