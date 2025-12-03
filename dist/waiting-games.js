@@ -2197,14 +2197,14 @@
                 this.shootCooldown--;
             if (this.invulnerabilityTime > 0)
                 this.invulnerabilityTime--;
-            // Ship controls
-            if (this.keys[this.keyMap.LEFT] || this.keys['a'] || this.keys['A'] || this.keys['rotateLeft']) {
+            // Ship controls - support both arrow keys and WASD
+            if (this.keys['ArrowLeft'] || this.keys[this.keyMap.LEFT] || this.keys['a'] || this.keys['A'] || this.keys['rotateLeft']) {
                 this.ship.angle -= 0.15;
             }
-            if (this.keys[this.keyMap.RIGHT] || this.keys['d'] || this.keys['D'] || this.keys['rotateRight']) {
+            if (this.keys['ArrowRight'] || this.keys[this.keyMap.RIGHT] || this.keys['d'] || this.keys['D'] || this.keys['rotateRight']) {
                 this.ship.angle += 0.15;
             }
-            this.ship.thrust = this.keys[this.keyMap.UP] || this.keys['w'] || this.keys['W'] || this.keys['thrust'];
+            this.ship.thrust = this.keys['ArrowUp'] || this.keys[this.keyMap.UP] || this.keys['w'] || this.keys['W'] || this.keys['thrust'];
             if (this.ship.thrust) {
                 const thrustPower = 0.3;
                 this.ship.vx += Math.cos(this.ship.angle) * thrustPower;
@@ -2223,14 +2223,19 @@
             this.ship.x += this.ship.vx;
             this.ship.y += this.ship.vy;
             this.wrapPosition(this.ship);
-            // Update bullets
+            // Update bullets - bullets disappear when leaving screen (authentic Asteroids behavior)
             this.bullets = this.bullets.filter(bullet => {
                 if (!bullet.active)
                     return false;
                 bullet.x += bullet.vx;
                 bullet.y += bullet.vy;
                 bullet.life--;
-                this.wrapPosition(bullet);
+                // Remove bullets that go off screen (original Asteroids behavior)
+                if (bullet.x < 0 || bullet.x > this.config.width ||
+                    bullet.y < 0 || bullet.y > this.config.height) {
+                    bullet.active = false;
+                    return false;
+                }
                 if (bullet.life <= 0) {
                     bullet.active = false;
                     return false;
