@@ -71,12 +71,19 @@ export class Tetris extends GameEngine {
   private dropTimer = 0;
   private dropInterval = 60;
   private gameState: 'playing' | 'gameOver' = 'playing';
-  private blockSize = 20;
+  private blockSize: number;
   private gridWidth = 10;
   private gridHeight = 20;
+  private offsetY: number;
 
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     super(container, config);
+    // Calculate block size to fit the grid within the canvas height
+    // Reserve space for UI at top (60px for score/lines/level) and bottom margin (10px)
+    const uiHeight = 70;
+    const availableHeight = this.config.height - uiHeight;
+    this.blockSize = Math.floor(availableHeight / this.gridHeight);
+    this.offsetY = uiHeight - 50; // Position grid after UI area
     this.initGame();
   }
 
@@ -159,11 +166,11 @@ export class Tetris extends GameEngine {
     const rect = this.canvas.getBoundingClientRect();
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
-    
+
     const gameAreaWidth = this.gridWidth * this.blockSize;
     const gameAreaHeight = this.gridHeight * this.blockSize;
     const offsetX = (this.config.width - gameAreaWidth) / 2;
-    const offsetY = 20;
+    const offsetY = this.offsetY;
 
     if (x < offsetX) {
       this.movePiece(-1, 0);
@@ -289,11 +296,11 @@ export class Tetris extends GameEngine {
   protected render(): void {
     this.ctx.fillStyle = '#000';
     this.ctx.fillRect(0, 0, this.config.width, this.config.height);
-    
+
     const gameAreaWidth = this.gridWidth * this.blockSize;
     const gameAreaHeight = this.gridHeight * this.blockSize;
     const offsetX = (this.config.width - gameAreaWidth) / 2;
-    const offsetY = 20;
+    const offsetY = this.offsetY;
     
     // Draw grid
     this.ctx.strokeStyle = '#333';

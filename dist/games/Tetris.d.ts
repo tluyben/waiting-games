@@ -13,6 +13,7 @@ export declare class Tetris extends GameEngine {
     private blockSize;
     private gridWidth;
     private gridHeight;
+    private offsetY;
     constructor(container: HTMLElement | string, config?: GameConfig);
     private initGame;
     private createRandomPiece;
