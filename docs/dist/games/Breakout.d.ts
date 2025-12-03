@@ -7,6 +7,8 @@ export declare class Breakout extends GameEngine {
     private score;
     private lives;
     private gameState;
+    private readonly DESIGN_WIDTH;
+    private readonly DESIGN_HEIGHT;
     constructor(container: HTMLElement | string, config?: GameConfig);
     private initGame;
     private createBricks;

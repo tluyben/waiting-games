@@ -9,6 +9,8 @@ export declare class Asteroids extends GameEngine {
     private gameState;
     private shootCooldown;
     private invulnerabilityTime;
+    private readonly DESIGN_WIDTH;
+    private readonly DESIGN_HEIGHT;
     constructor(container: HTMLElement | string, config?: GameConfig);
     private initGame;
     private createAsteroids;

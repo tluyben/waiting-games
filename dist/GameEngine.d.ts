@@ -10,7 +10,16 @@ export declare abstract class GameEngine implements GameInstance {
     protected animationId: number | null;
     protected isRunning: boolean;
     protected isPaused: boolean;
+    protected designWidth: number;
+    protected designHeight: number;
+    protected scale: number;
     constructor(container: HTMLElement | string, config?: GameConfig);
+    protected setDesignDimensions(width: number, height: number): void;
+    protected scaleX(x: number): number;
+    protected scaleY(y: number): number;
+    protected scaleValue(v: number): number;
+    protected get scaledWidth(): number;
+    protected get scaledHeight(): number;
     protected setupControls(): void;
     protected setupMobileControls(): void;
     protected handleKeyDown(event: KeyboardEvent): void;

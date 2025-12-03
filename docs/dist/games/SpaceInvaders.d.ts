@@ -15,6 +15,8 @@ export declare class SpaceInvaders extends GameEngine {
     private invaderAnimTimer;
     private shootCooldown;
     private explosions;
+    private readonly DESIGN_WIDTH;
+    private readonly DESIGN_HEIGHT;
     constructor(container: HTMLElement | string, config?: GameConfig);
     private createStars;
     private initGame;

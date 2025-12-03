@@ -15,8 +15,8 @@ class GameEngine {
         this.config = {
             useKeyboard: true,
             useMobile: false,
-            width: 400,
-            height: 300,
+            width: 600,
+            height: 400,
             theme: 'classic',
             keys: {},
             ...config
@@ -31,6 +31,11 @@ class GameEngine {
             START: 'Enter',
             ...this.config.keys
         };
+        // Default design dimensions - subclasses can override these
+        this.designWidth = 600;
+        this.designHeight = 450;
+        // Calculate scale based on the smaller ratio to maintain aspect ratio
+        this.scale = Math.min(this.config.width / this.designWidth, this.config.height / this.designHeight);
         this.canvas = document.createElement('canvas');
         this.canvas.width = this.config.width;
         this.canvas.height = this.config.height;
@@ -43,6 +48,31 @@ class GameEngine {
         this.ctx = ctx;
         element.appendChild(this.canvas);
         this.setupControls();
+    }
+    // Set design dimensions and recalculate scale
+    setDesignDimensions(width, height) {
+        this.designWidth = width;
+        this.designHeight = height;
+        this.scale = Math.min(this.config.width / this.designWidth, this.config.height / this.designHeight);
+    }
+    // Convert design coordinate to actual canvas coordinate
+    scaleX(x) {
+        return x * this.scale;
+    }
+    scaleY(y) {
+        return y * this.scale;
+    }
+    // Scale a value (used for sizes, speeds, etc.)
+    scaleValue(v) {
+        return v * this.scale;
+    }
+    // Get the scaled width (effective game area width in design coordinates)
+    get scaledWidth() {
+        return this.config.width / this.scale;
+    }
+    // Get the scaled height (effective game area height in design coordinates)
+    get scaledHeight() {
+        return this.config.height / this.scale;
     }
     setupControls() {
         if (this.config.useKeyboard) {
@@ -139,6 +169,11 @@ class Snake extends GameEngine {
         this.gameState = 'waiting';
         this.moveTimer = 0;
         this.moveInterval = 12; // Move every 12 frames (5 times per second at 60fps) - Slightly faster
+        // Design dimensions - the reference size that the game is designed for
+        this.DESIGN_WIDTH = 400;
+        this.DESIGN_HEIGHT = 300;
+        // Set design dimensions for proper scaling
+        this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
         this.initGame();
     }
     initGame() {
@@ -151,8 +186,9 @@ class Snake extends GameEngine {
         this.moveTimer = 0;
     }
     generateFood() {
-        const maxX = Math.floor(this.config.width / this.gridSize);
-        const maxY = Math.floor(this.config.height / this.gridSize);
+        // Use design dimensions for food placement
+        const maxX = Math.floor(this.DESIGN_WIDTH / this.gridSize);
+        const maxY = Math.floor(this.DESIGN_HEIGHT / this.gridSize);
         this.food = {
             x: Math.floor(Math.random() * maxX) * this.gridSize,
             y: Math.floor(Math.random() * maxY) * this.gridSize
@@ -203,10 +239,11 @@ class Snake extends GameEngine {
         }
         const touch = event.touches[0];
         const rect = this.canvas.getBoundingClientRect();
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
-        const centerX = this.config.width / 2;
-        const centerY = this.config.height / 2;
+        // Convert touch position to design coordinates
+        const x = (touch.clientX - rect.left) / this.scale;
+        const y = (touch.clientY - rect.top) / this.scale;
+        const centerX = this.DESIGN_WIDTH / 2;
+        const centerY = this.DESIGN_HEIGHT / 2;
         const deltaX = x - centerX;
         const deltaY = y - centerY;
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
@@ -250,8 +287,9 @@ class Snake extends GameEngine {
                 head.x += this.gridSize;
                 break;
         }
-        if (head.x < 0 || head.x >= this.config.width ||
-            head.y < 0 || head.y >= this.config.height) {
+        // Use design dimensions for boundary checking
+        if (head.x < 0 || head.x >= this.DESIGN_WIDTH ||
+            head.y < 0 || head.y >= this.DESIGN_HEIGHT) {
             this.gameOver = true;
             return;
         }
@@ -271,8 +309,12 @@ class Snake extends GameEngine {
         }
     }
     render() {
+        // Fill the entire canvas with background
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+        // Apply scaling transform for all game rendering
+        this.ctx.save();
+        this.ctx.scale(this.scale, this.scale);
         this.ctx.fillStyle = '#0f0';
         for (const segment of this.snake) {
             this.ctx.fillRect(segment.x, segment.y, this.gridSize - 2, this.gridSize - 2);
@@ -284,27 +326,29 @@ class Snake extends GameEngine {
         this.ctx.fillText(`Score: ${this.score}`, 10, 30);
         if (this.gameState === 'waiting') {
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+            this.ctx.fillRect(0, 0, this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
             this.ctx.fillStyle = '#fff';
             this.ctx.font = '30px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('Snake', this.config.width / 2, this.config.height / 2 - 20);
+            this.ctx.fillText('Snake', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 - 20);
             this.ctx.font = '16px Arial';
-            this.ctx.fillText('Press SPACE or tap to start', this.config.width / 2, this.config.height / 2 + 10);
+            this.ctx.fillText('Press SPACE or tap to start', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 10);
             this.ctx.textAlign = 'left';
         }
         else if (this.gameOver) {
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+            this.ctx.fillRect(0, 0, this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
             this.ctx.fillStyle = '#fff';
             this.ctx.font = '30px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('Game Over!', this.config.width / 2, this.config.height / 2 - 20);
+            this.ctx.fillText('Game Over!', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 - 20);
             this.ctx.font = '16px Arial';
-            this.ctx.fillText(`Final Score: ${this.score}`, this.config.width / 2, this.config.height / 2 + 10);
-            this.ctx.fillText('Press SPACE or tap to restart', this.config.width / 2, this.config.height / 2 + 40);
+            this.ctx.fillText(`Final Score: ${this.score}`, this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 10);
+            this.ctx.fillText('Press SPACE or tap to restart', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 40);
             this.ctx.textAlign = 'left';
         }
+        // Restore transform
+        this.ctx.restore();
     }
     start() {
         super.start();
@@ -318,6 +362,11 @@ class Pong extends GameEngine {
         this.leftScore = 0;
         this.rightScore = 0;
         this.gameState = 'waiting';
+        // Design dimensions - the reference size that the game is designed for
+        this.DESIGN_WIDTH = 400;
+        this.DESIGN_HEIGHT = 300;
+        // Set design dimensions for proper scaling
+        this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
         this.initGame();
     }
     initGame() {
@@ -325,22 +374,22 @@ class Pong extends GameEngine {
         const paddleWidth = 10;
         const paddleSpeed = 5;
         this.ball = {
-            x: this.config.width / 2,
-            y: this.config.height / 2,
+            x: this.DESIGN_WIDTH / 2,
+            y: this.DESIGN_HEIGHT / 2,
             vx: Math.random() < 0.5 ? -3 : 3,
             vy: Math.random() * 4 - 2,
             radius: 8
         };
         this.leftPaddle = {
             x: 20,
-            y: this.config.height / 2 - paddleHeight / 2,
+            y: this.DESIGN_HEIGHT / 2 - paddleHeight / 2,
             width: paddleWidth,
             height: paddleHeight,
             speed: paddleSpeed
         };
         this.rightPaddle = {
-            x: this.config.width - 30,
-            y: this.config.height / 2 - paddleHeight / 2,
+            x: this.DESIGN_WIDTH - 30,
+            y: this.DESIGN_HEIGHT / 2 - paddleHeight / 2,
             width: paddleWidth,
             height: paddleHeight,
             speed: paddleSpeed
@@ -372,14 +421,15 @@ class Pong extends GameEngine {
         super.handleTouchStart(event);
         const touch = event.touches[0];
         const rect = this.canvas.getBoundingClientRect();
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
+        // Convert touch position to design coordinates
+        const x = (touch.clientX - rect.left) / this.scale;
+        const y = (touch.clientY - rect.top) / this.scale;
         if (this.gameState === 'waiting') {
             this.gameState = 'playing';
             return;
         }
         // Only allow touch control of right paddle (human player)
-        if (x > this.config.width / 2) {
+        if (x > this.DESIGN_WIDTH / 2) {
             this.rightPaddle.y = y - this.rightPaddle.height / 2;
         }
         this.clampPaddles();
@@ -389,8 +439,8 @@ class Pong extends GameEngine {
         this.handleTouchStart(event);
     }
     clampPaddles() {
-        this.leftPaddle.y = Math.max(0, Math.min(this.config.height - this.leftPaddle.height, this.leftPaddle.y));
-        this.rightPaddle.y = Math.max(0, Math.min(this.config.height - this.rightPaddle.height, this.rightPaddle.y));
+        this.leftPaddle.y = Math.max(0, Math.min(this.DESIGN_HEIGHT - this.leftPaddle.height, this.leftPaddle.y));
+        this.rightPaddle.y = Math.max(0, Math.min(this.DESIGN_HEIGHT - this.rightPaddle.height, this.rightPaddle.y));
     }
     update() {
         if (this.gameState !== 'playing')
@@ -417,7 +467,8 @@ class Pong extends GameEngine {
         this.clampPaddles();
         this.ball.x += this.ball.vx;
         this.ball.y += this.ball.vy;
-        if (this.ball.y <= this.ball.radius || this.ball.y >= this.config.height - this.ball.radius) {
+        // Use design dimensions for boundary checking
+        if (this.ball.y <= this.ball.radius || this.ball.y >= this.DESIGN_HEIGHT - this.ball.radius) {
             this.ball.vy = -this.ball.vy;
         }
         if (this.checkPaddleCollision(this.leftPaddle) || this.checkPaddleCollision(this.rightPaddle)) {
@@ -429,7 +480,7 @@ class Pong extends GameEngine {
             this.rightScore++;
             this.resetBall();
         }
-        else if (this.ball.x > this.config.width) {
+        else if (this.ball.x > this.DESIGN_WIDTH) {
             this.leftScore++;
             this.resetBall();
         }
@@ -441,21 +492,25 @@ class Pong extends GameEngine {
             this.ball.y + this.ball.radius > paddle.y;
     }
     resetBall() {
-        this.ball.x = this.config.width / 2;
-        this.ball.y = this.config.height / 2;
+        this.ball.x = this.DESIGN_WIDTH / 2;
+        this.ball.y = this.DESIGN_HEIGHT / 2;
         this.ball.vx = Math.random() < 0.5 ? -3 : 3;
         this.ball.vy = Math.random() * 4 - 2;
         this.gameState = 'waiting';
     }
     render() {
+        // Fill entire canvas with background
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+        // Apply scaling transform for all game rendering
+        this.ctx.save();
+        this.ctx.scale(this.scale, this.scale);
         this.ctx.setLineDash([5, 5]);
         this.ctx.strokeStyle = '#fff';
         this.ctx.lineWidth = 2;
         this.ctx.beginPath();
-        this.ctx.moveTo(this.config.width / 2, 0);
-        this.ctx.lineTo(this.config.width / 2, this.config.height);
+        this.ctx.moveTo(this.DESIGN_WIDTH / 2, 0);
+        this.ctx.lineTo(this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT);
         this.ctx.stroke();
         this.ctx.setLineDash([]);
         this.ctx.fillStyle = '#fff';
@@ -466,30 +521,32 @@ class Pong extends GameEngine {
         this.ctx.fill();
         this.ctx.font = '30px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText(this.leftScore.toString(), this.config.width / 4, 50);
-        this.ctx.fillText(this.rightScore.toString(), (3 * this.config.width) / 4, 50);
+        this.ctx.fillText(this.leftScore.toString(), this.DESIGN_WIDTH / 4, 50);
+        this.ctx.fillText(this.rightScore.toString(), (3 * this.DESIGN_WIDTH) / 4, 50);
         // Player labels
         this.ctx.font = '12px Arial';
-        this.ctx.fillText('CPU', this.config.width / 4, 70);
-        this.ctx.fillText('YOU', (3 * this.config.width) / 4, 70);
+        this.ctx.fillText('CPU', this.DESIGN_WIDTH / 4, 70);
+        this.ctx.fillText('YOU', (3 * this.DESIGN_WIDTH) / 4, 70);
         if (this.gameState === 'waiting') {
             this.ctx.font = '20px Arial';
-            this.ctx.fillText('Press SPACE or tap to start', this.config.width / 2, this.config.height / 2 + 50);
+            this.ctx.fillText('Press SPACE or tap to start', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 50);
             if (this.config.useKeyboard) {
                 this.ctx.font = '14px Arial';
-                this.ctx.fillText('Use W/S or Arrow keys to move', this.config.width / 2, this.config.height / 2 + 80);
+                this.ctx.fillText('Use W/S or Arrow keys to move', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 80);
             }
         }
         else if (this.gameState === 'paused') {
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+            this.ctx.fillRect(0, 0, this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
             this.ctx.fillStyle = '#fff';
             this.ctx.font = '30px Arial';
-            this.ctx.fillText('PAUSED', this.config.width / 2, this.config.height / 2);
+            this.ctx.fillText('PAUSED', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2);
             this.ctx.font = '16px Arial';
-            this.ctx.fillText('Press SPACE to resume', this.config.width / 2, this.config.height / 2 + 30);
+            this.ctx.fillText('Press SPACE to resume', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 30);
         }
         this.ctx.textAlign = 'left';
+        // Restore transform
+        this.ctx.restore();
     }
 }
 
@@ -500,19 +557,24 @@ class Breakout extends GameEngine {
         this.score = 0;
         this.lives = 3;
         this.gameState = 'waiting';
+        // Design dimensions - the reference size that the game is designed for
+        this.DESIGN_WIDTH = 400;
+        this.DESIGN_HEIGHT = 300;
+        // Set design dimensions for proper scaling
+        this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
         this.initGame();
     }
     initGame() {
         this.ball = {
-            x: this.config.width / 2,
-            y: this.config.height - 80,
+            x: this.DESIGN_WIDTH / 2,
+            y: this.DESIGN_HEIGHT - 80,
             vx: 0,
             vy: 0,
             radius: 8
         };
         this.paddle = {
-            x: this.config.width / 2 - 40,
-            y: this.config.height - 30,
+            x: this.DESIGN_WIDTH / 2 - 40,
+            y: this.DESIGN_HEIGHT - 30,
             width: 80,
             height: 10,
             speed: 6
@@ -526,7 +588,7 @@ class Breakout extends GameEngine {
         this.bricks = [];
         const rows = 6;
         const cols = 8;
-        const brickWidth = this.config.width / cols - 4;
+        const brickWidth = this.DESIGN_WIDTH / cols - 4;
         const brickHeight = 20;
         const colors = ['#ff0000', '#ff8800', '#ffff00', '#00ff00', '#0088ff', '#0000ff'];
         for (let row = 0; row < rows; row++) {
@@ -575,7 +637,8 @@ class Breakout extends GameEngine {
         }
         const touch = event.touches[0];
         const rect = this.canvas.getBoundingClientRect();
-        const x = touch.clientX - rect.left;
+        // Convert touch position to design coordinates
+        const x = (touch.clientX - rect.left) / this.scale;
         this.paddle.x = x - this.paddle.width / 2;
         this.clampPaddle();
     }
@@ -586,7 +649,7 @@ class Breakout extends GameEngine {
         }
     }
     clampPaddle() {
-        this.paddle.x = Math.max(0, Math.min(this.config.width - this.paddle.width, this.paddle.x));
+        this.paddle.x = Math.max(0, Math.min(this.DESIGN_WIDTH - this.paddle.width, this.paddle.x));
     }
     update() {
         if (this.gameState !== 'playing')
@@ -602,7 +665,8 @@ class Breakout extends GameEngine {
         this.clampPaddle();
         this.ball.x += this.ball.vx;
         this.ball.y += this.ball.vy;
-        if (this.ball.x <= this.ball.radius || this.ball.x >= this.config.width - this.ball.radius) {
+        // Use design dimensions for boundary checking
+        if (this.ball.x <= this.ball.radius || this.ball.x >= this.DESIGN_WIDTH - this.ball.radius) {
             this.ball.vx = -this.ball.vx;
         }
         if (this.ball.y <= this.ball.radius) {
@@ -614,7 +678,7 @@ class Breakout extends GameEngine {
             this.ball.vx = (hitPos - 0.5) * 6;
         }
         this.checkBrickCollisions();
-        if (this.ball.y > this.config.height) {
+        if (this.ball.y > this.DESIGN_HEIGHT) {
             this.lives--;
             if (this.lives <= 0) {
                 this.gameState = 'gameOver';
@@ -650,15 +714,19 @@ class Breakout extends GameEngine {
         }
     }
     resetBall() {
-        this.ball.x = this.config.width / 2;
-        this.ball.y = this.config.height - 80;
+        this.ball.x = this.DESIGN_WIDTH / 2;
+        this.ball.y = this.DESIGN_HEIGHT - 80;
         this.ball.vx = 0;
         this.ball.vy = 0;
         this.gameState = 'waiting';
     }
     render() {
+        // Fill entire canvas with background
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+        // Apply scaling transform for all game rendering
+        this.ctx.save();
+        this.ctx.scale(this.scale, this.scale);
         for (const brick of this.bricks) {
             if (!brick.destroyed) {
                 this.ctx.fillStyle = brick.color;
@@ -675,39 +743,41 @@ class Breakout extends GameEngine {
         this.ctx.fill();
         this.ctx.font = '20px Arial';
         this.ctx.fillText(`Score: ${this.score}`, 10, 30);
-        this.ctx.fillText(`Lives: ${this.lives}`, this.config.width - 100, 30);
+        this.ctx.fillText(`Lives: ${this.lives}`, this.DESIGN_WIDTH - 100, 30);
         if (this.gameState === 'waiting') {
             this.ctx.font = '20px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('Press SPACE or tap to launch ball', this.config.width / 2, this.config.height / 2);
+            this.ctx.fillText('Press SPACE or tap to launch ball', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2);
             if (this.config.useKeyboard) {
                 this.ctx.font = '14px Arial';
-                this.ctx.fillText('Use A/D or ←/→ to move paddle', this.config.width / 2, this.config.height / 2 + 30);
+                this.ctx.fillText('Use A/D or ←/→ to move paddle', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 30);
             }
         }
         else if (this.gameState === 'gameOver') {
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+            this.ctx.fillRect(0, 0, this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
             this.ctx.fillStyle = '#fff';
             this.ctx.font = '30px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('Game Over!', this.config.width / 2, this.config.height / 2 - 20);
+            this.ctx.fillText('Game Over!', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 - 20);
             this.ctx.font = '16px Arial';
-            this.ctx.fillText(`Final Score: ${this.score}`, this.config.width / 2, this.config.height / 2 + 10);
-            this.ctx.fillText('Press SPACE or tap to restart', this.config.width / 2, this.config.height / 2 + 40);
+            this.ctx.fillText(`Final Score: ${this.score}`, this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 10);
+            this.ctx.fillText('Press SPACE or tap to restart', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 40);
         }
         else if (this.gameState === 'won') {
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+            this.ctx.fillRect(0, 0, this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
             this.ctx.fillStyle = '#fff';
             this.ctx.font = '30px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('You Win!', this.config.width / 2, this.config.height / 2 - 20);
+            this.ctx.fillText('You Win!', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 - 20);
             this.ctx.font = '16px Arial';
-            this.ctx.fillText(`Final Score: ${this.score}`, this.config.width / 2, this.config.height / 2 + 10);
-            this.ctx.fillText('Press SPACE or tap to play again', this.config.width / 2, this.config.height / 2 + 40);
+            this.ctx.fillText(`Final Score: ${this.score}`, this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 10);
+            this.ctx.fillText('Press SPACE or tap to play again', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 40);
         }
         this.ctx.textAlign = 'left';
+        // Restore transform
+        this.ctx.restore();
     }
 }
 
@@ -727,6 +797,11 @@ class SpaceInvaders extends GameEngine {
         this.invaderAnimTimer = 0;
         this.shootCooldown = 0;
         this.explosions = [];
+        // Design constants (all values are in design coordinates, will be scaled for rendering)
+        this.DESIGN_WIDTH = 600;
+        this.DESIGN_HEIGHT = 450;
+        // Set design dimensions for proper scaling
+        this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
         this.createStars();
         this.initGame();
     }
@@ -734,17 +809,19 @@ class SpaceInvaders extends GameEngine {
         this.stars = [];
         for (let i = 0; i < 50; i++) {
             this.stars.push({
-                x: Math.random() * this.config.width,
-                y: Math.random() * (this.config.height - 100),
+                x: Math.random() * this.DESIGN_WIDTH,
+                y: Math.random() * (this.DESIGN_HEIGHT - 100),
                 brightness: Math.random() * 0.5 + 0.3,
                 twinkleSpeed: Math.random() * 0.02 + 0.01
             });
         }
     }
     initGame() {
+        // All game logic uses design coordinates (600x450)
+        // Rendering will scale to actual canvas size
         this.player = {
-            x: this.config.width / 2 - 20,
-            y: this.config.height - 50,
+            x: this.DESIGN_WIDTH / 2 - 20,
+            y: this.DESIGN_HEIGHT - 50,
             width: 40,
             height: 24,
             speed: 5
@@ -769,7 +846,8 @@ class SpaceInvaders extends GameEngine {
         const invaderHeight = 16;
         const spacingX = 12;
         const spacingY = 12;
-        const startX = (this.config.width - (cols * (invaderWidth + spacingX) - spacingX)) / 2;
+        // Use design width for centering
+        const startX = (this.DESIGN_WIDTH - (cols * (invaderWidth + spacingX) - spacingX)) / 2;
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
                 this.invaders.push({
@@ -789,7 +867,8 @@ class SpaceInvaders extends GameEngine {
         const shieldCount = 4;
         const shieldWidth = 44;
         const shieldHeight = 32;
-        const spacing = (this.config.width - shieldCount * shieldWidth) / (shieldCount + 1);
+        // Use design width for spacing calculation
+        const spacing = (this.DESIGN_WIDTH - shieldCount * shieldWidth) / (shieldCount + 1);
         for (let i = 0; i < shieldCount; i++) {
             const pixels = [];
             for (let y = 0; y < shieldHeight; y++) {
@@ -805,7 +884,7 @@ class SpaceInvaders extends GameEngine {
             }
             this.shields.push({
                 x: spacing + i * (shieldWidth + spacing),
-                y: this.config.height - 120,
+                y: this.DESIGN_HEIGHT - 120,
                 pixels
             });
         }
@@ -833,11 +912,12 @@ class SpaceInvaders extends GameEngine {
         }
         const touch = event.touches[0];
         const rect = this.canvas.getBoundingClientRect();
-        const x = touch.clientX - rect.left;
-        if (x < this.config.width / 3) {
+        // Convert touch position to design coordinates
+        const x = (touch.clientX - rect.left) / this.scale;
+        if (x < this.DESIGN_WIDTH / 3) {
             this.keys['left'] = true;
         }
-        else if (x > (2 * this.config.width) / 3) {
+        else if (x > (2 * this.DESIGN_WIDTH) / 3) {
             this.keys['right'] = true;
         }
         else {
@@ -896,12 +976,13 @@ class SpaceInvaders extends GameEngine {
                 this.player.x += this.player.speed;
             }
         }
-        this.player.x = Math.max(0, Math.min(this.config.width - this.player.width, this.player.x));
-        // Update bullets
+        // Use design dimensions for boundary checking
+        this.player.x = Math.max(0, Math.min(this.DESIGN_WIDTH - this.player.width, this.player.x));
+        // Update bullets - use design dimensions for boundaries
         this.bullets = this.bullets.filter(bullet => {
             bullet.x += bullet.vx;
             bullet.y += bullet.vy;
-            return bullet.active && bullet.y > -bullet.height && bullet.y < this.config.height + bullet.height;
+            return bullet.active && bullet.y > -bullet.height && bullet.y < this.DESIGN_HEIGHT + bullet.height;
         });
         // Update explosions
         this.explosions = this.explosions.filter(exp => {
@@ -991,11 +1072,11 @@ class SpaceInvaders extends GameEngine {
         // Move invaders in steps (more authentic feel)
         if (this.invaderMoveTimer >= Math.max(5, 30 - speedMultiplier * 4)) {
             this.invaderMoveTimer = 0;
-            // Check if any invader will hit the edge
+            // Check if any invader will hit the edge - use design width
             let hitEdge = false;
             for (const invader of activeInvaders) {
                 const nextX = invader.x + this.invaderDirection * 8;
-                if (nextX <= 0 || nextX >= this.config.width - invader.width) {
+                if (nextX <= 0 || nextX >= this.DESIGN_WIDTH - invader.width) {
                     hitEdge = true;
                     break;
                 }
@@ -1058,15 +1139,18 @@ class SpaceInvaders extends GameEngine {
             obj1.y + obj1.height > obj2.y;
     }
     render() {
-        // Dark space background
+        // Dark space background - fill entire canvas
         this.ctx.fillStyle = '#0a0a15';
         this.ctx.fillRect(0, 0, this.config.width, this.config.height);
-        // Draw twinkling stars
+        // Apply scaling transform for all game rendering
+        this.ctx.save();
+        this.ctx.scale(this.scale, this.scale);
+        // Draw twinkling stars (in design coordinates, now scaled)
         for (const star of this.stars) {
             this.ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness})`;
             this.ctx.fillRect(star.x, star.y, 1, 1);
         }
-        // Draw shields
+        // Draw shields (in design coordinates)
         this.ctx.fillStyle = '#33ff33';
         for (const shield of this.shields) {
             for (let y = 0; y < shield.pixels.length; y++) {
@@ -1085,7 +1169,7 @@ class SpaceInvaders extends GameEngine {
                 this.drawInvader(invader);
             }
         }
-        // Draw bullets
+        // Draw bullets (in design coordinates)
         for (const bullet of this.bullets) {
             if (bullet.active) {
                 if (bullet.isPlayer) {
@@ -1108,20 +1192,22 @@ class SpaceInvaders extends GameEngine {
                 }
             }
         }
-        // Draw explosions
+        // Draw explosions (in design coordinates)
         for (const exp of this.explosions) {
             this.drawExplosion(exp);
         }
-        // Draw HUD with retro styling
+        // Draw HUD with retro styling (in design coordinates)
         this.drawHUD();
-        // Draw game over/won screens
+        // Draw game over/won screens (in design coordinates)
         if (this.gameState === 'gameOver' || this.gameState === 'won') {
             this.drawEndScreen();
         }
-        // Draw mobile controls if enabled
+        // Draw mobile controls if enabled (in design coordinates)
         if (this.config.useMobile && this.gameState === 'playing') {
             this.drawMobileControls();
         }
+        // Restore transform
+        this.ctx.restore();
         this.ctx.textAlign = 'left';
     }
     drawPlayer() {
@@ -1267,91 +1353,91 @@ class SpaceInvaders extends GameEngine {
         this.ctx.fillText('SCORE', 10, 18);
         this.ctx.fillStyle = '#33ff33';
         this.ctx.fillText(this.score.toString().padStart(5, '0'), 10, 35);
-        // High score display (center)
+        // High score display (center) - use design width
         this.ctx.fillStyle = '#ffffff';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('HIGH SCORE', this.config.width / 2, 18);
+        this.ctx.fillText('HIGH SCORE', this.DESIGN_WIDTH / 2, 18);
         this.ctx.fillStyle = '#ff3333';
-        this.ctx.fillText(this.highScore.toString().padStart(5, '0'), this.config.width / 2, 35);
-        // Lives display (right) - draw small ships
+        this.ctx.fillText(this.highScore.toString().padStart(5, '0'), this.DESIGN_WIDTH / 2, 35);
+        // Lives display (right) - draw small ships - use design width
         this.ctx.fillStyle = '#ffffff';
         this.ctx.textAlign = 'right';
-        this.ctx.fillText('LIVES', this.config.width - 10, 18);
+        this.ctx.fillText('LIVES', this.DESIGN_WIDTH - 10, 18);
         this.ctx.fillStyle = '#33ff33';
         for (let i = 0; i < this.lives; i++) {
-            const lx = this.config.width - 25 - i * 25;
+            const lx = this.DESIGN_WIDTH - 25 - i * 25;
             const ly = 25;
             // Mini ship icon
             this.ctx.fillRect(lx, ly + 6, 20, 4);
             this.ctx.fillRect(lx + 4, ly + 2, 12, 4);
             this.ctx.fillRect(lx + 8, ly, 4, 2);
         }
-        // Bottom line (ground)
+        // Bottom line (ground) - use design dimensions
         this.ctx.fillStyle = '#33ff33';
-        this.ctx.fillRect(0, this.config.height - 4, this.config.width, 2);
+        this.ctx.fillRect(0, this.DESIGN_HEIGHT - 4, this.DESIGN_WIDTH, 2);
     }
     drawEndScreen() {
-        // Semi-transparent overlay
+        // Semi-transparent overlay - use design dimensions
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-        this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+        this.ctx.fillRect(0, 0, this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
         this.ctx.textAlign = 'center';
         if (this.gameState === 'gameOver') {
             // Game Over text with red glow
             this.ctx.fillStyle = '#ff0000';
             this.ctx.font = 'bold 36px "Courier New", monospace';
-            this.ctx.fillText('GAME OVER', this.config.width / 2, this.config.height / 2 - 40);
+            this.ctx.fillText('GAME OVER', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 - 40);
             // Decorative line
             this.ctx.strokeStyle = '#ff0000';
             this.ctx.lineWidth = 2;
             this.ctx.beginPath();
-            this.ctx.moveTo(this.config.width / 2 - 100, this.config.height / 2 - 15);
-            this.ctx.lineTo(this.config.width / 2 + 100, this.config.height / 2 - 15);
+            this.ctx.moveTo(this.DESIGN_WIDTH / 2 - 100, this.DESIGN_HEIGHT / 2 - 15);
+            this.ctx.lineTo(this.DESIGN_WIDTH / 2 + 100, this.DESIGN_HEIGHT / 2 - 15);
             this.ctx.stroke();
         }
         else {
             // Victory text with green glow
             this.ctx.fillStyle = '#00ff00';
             this.ctx.font = 'bold 36px "Courier New", monospace';
-            this.ctx.fillText('VICTORY!', this.config.width / 2, this.config.height / 2 - 40);
+            this.ctx.fillText('VICTORY!', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 - 40);
             // Decorative line
             this.ctx.strokeStyle = '#00ff00';
             this.ctx.lineWidth = 2;
             this.ctx.beginPath();
-            this.ctx.moveTo(this.config.width / 2 - 100, this.config.height / 2 - 15);
-            this.ctx.lineTo(this.config.width / 2 + 100, this.config.height / 2 - 15);
+            this.ctx.moveTo(this.DESIGN_WIDTH / 2 - 100, this.DESIGN_HEIGHT / 2 - 15);
+            this.ctx.lineTo(this.DESIGN_WIDTH / 2 + 100, this.DESIGN_HEIGHT / 2 - 15);
             this.ctx.stroke();
         }
         // Score display
         this.ctx.fillStyle = '#ffffff';
         this.ctx.font = '20px "Courier New", monospace';
-        this.ctx.fillText(`FINAL SCORE: ${this.score}`, this.config.width / 2, this.config.height / 2 + 20);
+        this.ctx.fillText(`FINAL SCORE: ${this.score}`, this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 20);
         // High score
         if (this.score >= this.highScore && this.score > 0) {
             this.ctx.fillStyle = '#ffff00';
-            this.ctx.fillText('NEW HIGH SCORE!', this.config.width / 2, this.config.height / 2 + 50);
+            this.ctx.fillText('NEW HIGH SCORE!', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 50);
         }
         // Restart instruction
         this.ctx.fillStyle = '#aaaaaa';
         this.ctx.font = '16px "Courier New", monospace';
         const blinkOn = Math.floor(Date.now() / 500) % 2 === 0;
         if (blinkOn) {
-            this.ctx.fillText('PRESS SPACE TO PLAY AGAIN', this.config.width / 2, this.config.height / 2 + 90);
+            this.ctx.fillText('PRESS SPACE TO PLAY AGAIN', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 90);
         }
     }
     drawMobileControls() {
         this.ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-        // Left button
-        this.ctx.fillRect(10, this.config.height - 55, 50, 45);
+        // Left button - use design dimensions
+        this.ctx.fillRect(10, this.DESIGN_HEIGHT - 55, 50, 45);
         // Right button
-        this.ctx.fillRect(this.config.width - 60, this.config.height - 55, 50, 45);
+        this.ctx.fillRect(this.DESIGN_WIDTH - 60, this.DESIGN_HEIGHT - 55, 50, 45);
         // Fire button
-        this.ctx.fillRect(this.config.width / 2 - 35, this.config.height - 55, 70, 45);
+        this.ctx.fillRect(this.DESIGN_WIDTH / 2 - 35, this.DESIGN_HEIGHT - 55, 70, 45);
         this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
         this.ctx.font = 'bold 18px "Courier New", monospace';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('<', 35, this.config.height - 27);
-        this.ctx.fillText('>', this.config.width - 35, this.config.height - 27);
-        this.ctx.fillText('FIRE', this.config.width / 2, this.config.height - 27);
+        this.ctx.fillText('<', 35, this.DESIGN_HEIGHT - 27);
+        this.ctx.fillText('>', this.DESIGN_WIDTH - 35, this.DESIGN_HEIGHT - 27);
+        this.ctx.fillText('FIRE', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT - 27);
     }
 }
 
@@ -1401,7 +1487,12 @@ const COLORS = {
 };
 class Tetris extends GameEngine {
     constructor(container, config = {}) {
-        super(container, config);
+        const tetrisConfig = {
+            ...config,
+            width: config.width || 300,
+            height: config.height || 500
+        };
+        super(container, tetrisConfig);
         this.currentPiece = null;
         this.nextPiece = null;
         this.score = 0;
@@ -2074,12 +2165,17 @@ class Asteroids extends GameEngine {
         this.gameState = 'playing';
         this.shootCooldown = 0;
         this.invulnerabilityTime = 0;
+        // Design dimensions - the reference size that the game is designed for
+        this.DESIGN_WIDTH = 600;
+        this.DESIGN_HEIGHT = 450;
+        // Set design dimensions for proper scaling
+        this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
         this.initGame();
     }
     initGame() {
         this.ship = {
-            x: this.config.width / 2,
-            y: this.config.height / 2,
+            x: this.DESIGN_WIDTH / 2,
+            y: this.DESIGN_HEIGHT / 2,
             angle: 0,
             vx: 0,
             vy: 0,
@@ -2097,13 +2193,13 @@ class Asteroids extends GameEngine {
     }
     createAsteroids(count) {
         for (let i = 0; i < count; i++) {
-            this.createAsteroid(64, Math.random() * this.config.width, Math.random() * this.config.height);
+            this.createAsteroid(64, Math.random() * this.DESIGN_WIDTH, Math.random() * this.DESIGN_HEIGHT);
         }
     }
     createAsteroid(size, x, y) {
         this.asteroids.push({
-            x: x !== null && x !== void 0 ? x : Math.random() * this.config.width,
-            y: y !== null && y !== void 0 ? y : Math.random() * this.config.height,
+            x: x !== null && x !== void 0 ? x : Math.random() * this.DESIGN_WIDTH,
+            y: y !== null && y !== void 0 ? y : Math.random() * this.DESIGN_HEIGHT,
             vx: (Math.random() - 0.5) * 4,
             vy: (Math.random() - 0.5) * 4,
             angle: Math.random() * Math.PI * 2,
@@ -2113,12 +2209,12 @@ class Asteroids extends GameEngine {
     }
     wrapPosition(obj) {
         if (obj.x < 0)
-            obj.x = this.config.width;
-        if (obj.x > this.config.width)
+            obj.x = this.DESIGN_WIDTH;
+        if (obj.x > this.DESIGN_WIDTH)
             obj.x = 0;
         if (obj.y < 0)
-            obj.y = this.config.height;
-        if (obj.y > this.config.height)
+            obj.y = this.DESIGN_HEIGHT;
+        if (obj.y > this.DESIGN_HEIGHT)
             obj.y = 0;
     }
     handleKeyDown(event) {
@@ -2147,10 +2243,11 @@ class Asteroids extends GameEngine {
         }
         const touch = event.touches[0];
         const rect = this.canvas.getBoundingClientRect();
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
-        const centerX = this.config.width / 2;
-        const centerY = this.config.height / 2;
+        // Convert touch position to design coordinates
+        const x = (touch.clientX - rect.left) / this.scale;
+        const y = (touch.clientY - rect.top) / this.scale;
+        const centerX = this.DESIGN_WIDTH / 2;
+        const centerY = this.DESIGN_HEIGHT / 2;
         if (Math.abs(x - centerX) > Math.abs(y - centerY)) {
             // Horizontal touch - rotate
             if (x > centerX) {
@@ -2232,8 +2329,8 @@ class Asteroids extends GameEngine {
             bullet.y += bullet.vy;
             bullet.life--;
             // Remove bullets that go off screen (original Asteroids behavior)
-            if (bullet.x < 0 || bullet.x > this.config.width ||
-                bullet.y < 0 || bullet.y > this.config.height) {
+            if (bullet.x < 0 || bullet.x > this.DESIGN_WIDTH ||
+                bullet.y < 0 || bullet.y > this.DESIGN_HEIGHT) {
                 bullet.active = false;
                 return false;
             }
@@ -2306,8 +2403,8 @@ class Asteroids extends GameEngine {
                     this.lives--;
                     this.invulnerabilityTime = 120;
                     // Reset ship position and velocity
-                    this.ship.x = this.config.width / 2;
-                    this.ship.y = this.config.height / 2;
+                    this.ship.x = this.DESIGN_WIDTH / 2;
+                    this.ship.y = this.DESIGN_HEIGHT / 2;
                     this.ship.vx = 0;
                     this.ship.vy = 0;
                     this.ship.angle = 0;
@@ -2320,8 +2417,12 @@ class Asteroids extends GameEngine {
         }
     }
     render() {
+        // Fill entire canvas with background
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+        // Apply scaling transform for all game rendering
+        this.ctx.save();
+        this.ctx.scale(this.scale, this.scale);
         // Draw asteroids
         this.ctx.strokeStyle = '#fff';
         this.ctx.lineWidth = 2;
@@ -2389,32 +2490,34 @@ class Asteroids extends GameEngine {
         this.ctx.fillText(`Lives: ${this.lives}`, 10, 45);
         if (this.gameState === 'gameOver') {
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+            this.ctx.fillRect(0, 0, this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
             this.ctx.fillStyle = '#fff';
             this.ctx.font = '30px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('Game Over!', this.config.width / 2, this.config.height / 2 - 20);
+            this.ctx.fillText('Game Over!', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 - 20);
             this.ctx.font = '16px Arial';
-            this.ctx.fillText(`Final Score: ${this.score}`, this.config.width / 2, this.config.height / 2 + 10);
-            this.ctx.fillText('Press SPACE or tap to restart', this.config.width / 2, this.config.height / 2 + 40);
+            this.ctx.fillText(`Final Score: ${this.score}`, this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 10);
+            this.ctx.fillText('Press SPACE or tap to restart', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 40);
             this.ctx.textAlign = 'left';
         }
         else if (this.config.useMobile) {
             // Mobile control hints
             this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            this.ctx.fillRect(10, this.config.height - 60, 60, 50);
-            this.ctx.fillRect(this.config.width - 70, this.config.height - 60, 60, 50);
-            this.ctx.fillRect(this.config.width / 2 - 30, 10, 60, 50);
-            this.ctx.fillRect(this.config.width / 2 - 30, this.config.height - 60, 60, 50);
+            this.ctx.fillRect(10, this.DESIGN_HEIGHT - 60, 60, 50);
+            this.ctx.fillRect(this.DESIGN_WIDTH - 70, this.DESIGN_HEIGHT - 60, 60, 50);
+            this.ctx.fillRect(this.DESIGN_WIDTH / 2 - 30, 10, 60, 50);
+            this.ctx.fillRect(this.DESIGN_WIDTH / 2 - 30, this.DESIGN_HEIGHT - 60, 60, 50);
             this.ctx.fillStyle = '#fff';
             this.ctx.font = '12px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('↺', 40, this.config.height - 30);
-            this.ctx.fillText('↻', this.config.width - 40, this.config.height - 30);
-            this.ctx.fillText('↑', this.config.width / 2, 35);
-            this.ctx.fillText('FIRE', this.config.width / 2, this.config.height - 30);
+            this.ctx.fillText('↺', 40, this.DESIGN_HEIGHT - 30);
+            this.ctx.fillText('↻', this.DESIGN_WIDTH - 40, this.DESIGN_HEIGHT - 30);
+            this.ctx.fillText('↑', this.DESIGN_WIDTH / 2, 35);
+            this.ctx.fillText('FIRE', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT - 30);
             this.ctx.textAlign = 'left';
         }
+        // Restore transform
+        this.ctx.restore();
     }
 }
 
@@ -2422,8 +2525,8 @@ class Frogger extends GameEngine {
     constructor(container, config = {}) {
         const froggerConfig = {
             ...config,
-            width: config.width || 13 * 32,
-            height: config.height || 14 * 32
+            width: config.width || 13 * 40,
+            height: config.height || 14 * 40
         };
         super(container, froggerConfig);
         this.vehicles = [];
@@ -2433,7 +2536,7 @@ class Frogger extends GameEngine {
         this.lives = 3;
         this.time = 60;
         this.gameState = 'playing';
-        this.cellSize = 32;
+        this.cellSize = 40;
         this.timer = 0;
         this.initGame();
     }
@@ -2853,8 +2956,8 @@ class DonkeyKong extends GameEngine {
     constructor(container, config = {}) {
         const dkConfig = {
             ...config,
-            width: config.width || 400,
-            height: config.height || 500
+            width: config.width || 500,
+            height: config.height || 600
         };
         super(container, dkConfig);
         this.platforms = [];
@@ -3291,8 +3394,8 @@ class Qbert extends GameEngine {
     constructor(container, config = {}) {
         const qbertConfig = {
             ...config,
-            width: config.width || 450,
-            height: config.height || 400
+            width: config.width || 600,
+            height: config.height || 450
         };
         super(container, qbertConfig);
         this.cubes = [];
@@ -3706,8 +3809,8 @@ class Kaboom extends GameEngine {
     constructor(container, config = {}) {
         const kaboomConfig = {
             ...config,
-            width: config.width || 400,
-            height: config.height || 500
+            width: config.width || 500,
+            height: config.height || 600
         };
         super(container, kaboomConfig);
         this.bombs = [];
@@ -4001,8 +4104,8 @@ class Adventure extends GameEngine {
     constructor(container, config = {}) {
         const adventureConfig = {
             ...config,
-            width: config.width || 400,
-            height: config.height || 300
+            width: config.width || 600,
+            height: config.height || 400
         };
         super(container, adventureConfig);
         this.rooms = [];
@@ -4407,8 +4510,8 @@ class MissileCommand extends GameEngine {
     constructor(container, config = {}) {
         const missileConfig = {
             ...config,
-            width: config.width || 500,
-            height: config.height || 400
+            width: config.width || 600,
+            height: config.height || 450
         };
         super(container, missileConfig);
         this.cities = [];
@@ -6182,8 +6285,8 @@ class Berzerk extends GameEngine {
     constructor(container, config = {}) {
         const berzerkConfig = {
             ...config,
-            width: config.width || 520,
-            height: config.height || 360
+            width: config.width || 600,
+            height: config.height || 400
         };
         super(container, berzerkConfig);
         this.robots = [];
@@ -6797,8 +6900,8 @@ class CircusAtari extends GameEngine {
     constructor(container, config = {}) {
         const circusConfig = {
             ...config,
-            width: config.width || 500,
-            height: config.height || 400
+            width: config.width || 600,
+            height: config.height || 450
         };
         super(container, circusConfig);
         this.clowns = [];
@@ -7815,8 +7918,8 @@ class DigDug extends GameEngine {
     constructor(container, config = {}) {
         const digdugConfig = {
             ...config,
-            width: config.width || 512,
-            height: config.height || 384
+            width: config.width || 608,
+            height: config.height || 448
         };
         super(container, digdugConfig);
         this.enemies = [];

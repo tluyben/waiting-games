@@ -42,7 +42,7 @@ interface Star {
 }
 
 export class SpaceInvaders extends GameEngine {
-  private player: Player;
+  private player!: Player;
   private bullets: Bullet[] = [];
   private invaders: Invader[] = [];
   private shields: Shield[] = [];
@@ -57,8 +57,14 @@ export class SpaceInvaders extends GameEngine {
   private shootCooldown = 0;
   private explosions: { x: number; y: number; frame: number; maxFrames: number }[] = [];
 
+  // Design constants (all values are in design coordinates, will be scaled for rendering)
+  private readonly DESIGN_WIDTH = 600;
+  private readonly DESIGN_HEIGHT = 450;
+
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     super(container, config);
+    // Set design dimensions for proper scaling
+    this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
     this.createStars();
     this.initGame();
   }
@@ -67,8 +73,8 @@ export class SpaceInvaders extends GameEngine {
     this.stars = [];
     for (let i = 0; i < 50; i++) {
       this.stars.push({
-        x: Math.random() * this.config.width,
-        y: Math.random() * (this.config.height - 100),
+        x: Math.random() * this.DESIGN_WIDTH,
+        y: Math.random() * (this.DESIGN_HEIGHT - 100),
         brightness: Math.random() * 0.5 + 0.3,
         twinkleSpeed: Math.random() * 0.02 + 0.01
       });
@@ -76,9 +82,11 @@ export class SpaceInvaders extends GameEngine {
   }
 
   private initGame(): void {
+    // All game logic uses design coordinates (600x450)
+    // Rendering will scale to actual canvas size
     this.player = {
-      x: this.config.width / 2 - 20,
-      y: this.config.height - 50,
+      x: this.DESIGN_WIDTH / 2 - 20,
+      y: this.DESIGN_HEIGHT - 50,
       width: 40,
       height: 24,
       speed: 5
@@ -105,7 +113,8 @@ export class SpaceInvaders extends GameEngine {
     const invaderHeight = 16;
     const spacingX = 12;
     const spacingY = 12;
-    const startX = (this.config.width - (cols * (invaderWidth + spacingX) - spacingX)) / 2;
+    // Use design width for centering
+    const startX = (this.DESIGN_WIDTH - (cols * (invaderWidth + spacingX) - spacingX)) / 2;
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
@@ -127,7 +136,8 @@ export class SpaceInvaders extends GameEngine {
     const shieldCount = 4;
     const shieldWidth = 44;
     const shieldHeight = 32;
-    const spacing = (this.config.width - shieldCount * shieldWidth) / (shieldCount + 1);
+    // Use design width for spacing calculation
+    const spacing = (this.DESIGN_WIDTH - shieldCount * shieldWidth) / (shieldCount + 1);
 
     for (let i = 0; i < shieldCount; i++) {
       const pixels: boolean[][] = [];
@@ -144,7 +154,7 @@ export class SpaceInvaders extends GameEngine {
       }
       this.shields.push({
         x: spacing + i * (shieldWidth + spacing),
-        y: this.config.height - 120,
+        y: this.DESIGN_HEIGHT - 120,
         pixels
       });
     }
@@ -171,7 +181,7 @@ export class SpaceInvaders extends GameEngine {
 
   protected handleTouchStart(event: TouchEvent): void {
     super.handleTouchStart(event);
-    
+
     if (this.gameState === 'gameOver' || this.gameState === 'won') {
       this.initGame();
       return;
@@ -179,11 +189,12 @@ export class SpaceInvaders extends GameEngine {
 
     const touch = event.touches[0];
     const rect = this.canvas.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    
-    if (x < this.config.width / 3) {
+    // Convert touch position to design coordinates
+    const x = (touch.clientX - rect.left) / this.scale;
+
+    if (x < this.DESIGN_WIDTH / 3) {
       this.keys['left'] = true;
-    } else if (x > (2 * this.config.width) / 3) {
+    } else if (x > (2 * this.DESIGN_WIDTH) / 3) {
       this.keys['right'] = true;
     } else {
       if (this.shootCooldown <= 0) {
@@ -246,13 +257,14 @@ export class SpaceInvaders extends GameEngine {
       }
     }
 
-    this.player.x = Math.max(0, Math.min(this.config.width - this.player.width, this.player.x));
+    // Use design dimensions for boundary checking
+    this.player.x = Math.max(0, Math.min(this.DESIGN_WIDTH - this.player.width, this.player.x));
 
-    // Update bullets
+    // Update bullets - use design dimensions for boundaries
     this.bullets = this.bullets.filter(bullet => {
       bullet.x += bullet.vx;
       bullet.y += bullet.vy;
-      return bullet.active && bullet.y > -bullet.height && bullet.y < this.config.height + bullet.height;
+      return bullet.active && bullet.y > -bullet.height && bullet.y < this.DESIGN_HEIGHT + bullet.height;
     });
 
     // Update explosions
@@ -354,11 +366,11 @@ export class SpaceInvaders extends GameEngine {
     if (this.invaderMoveTimer >= Math.max(5, 30 - speedMultiplier * 4)) {
       this.invaderMoveTimer = 0;
 
-      // Check if any invader will hit the edge
+      // Check if any invader will hit the edge - use design width
       let hitEdge = false;
       for (const invader of activeInvaders) {
         const nextX = invader.x + this.invaderDirection * 8;
-        if (nextX <= 0 || nextX >= this.config.width - invader.width) {
+        if (nextX <= 0 || nextX >= this.DESIGN_WIDTH - invader.width) {
           hitEdge = true;
           break;
         }
@@ -423,17 +435,21 @@ export class SpaceInvaders extends GameEngine {
   }
 
   protected render(): void {
-    // Dark space background
+    // Dark space background - fill entire canvas
     this.ctx.fillStyle = '#0a0a15';
     this.ctx.fillRect(0, 0, this.config.width, this.config.height);
 
-    // Draw twinkling stars
+    // Apply scaling transform for all game rendering
+    this.ctx.save();
+    this.ctx.scale(this.scale, this.scale);
+
+    // Draw twinkling stars (in design coordinates, now scaled)
     for (const star of this.stars) {
       this.ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness})`;
       this.ctx.fillRect(star.x, star.y, 1, 1);
     }
 
-    // Draw shields
+    // Draw shields (in design coordinates)
     this.ctx.fillStyle = '#33ff33';
     for (const shield of this.shields) {
       for (let y = 0; y < shield.pixels.length; y++) {
@@ -455,7 +471,7 @@ export class SpaceInvaders extends GameEngine {
       }
     }
 
-    // Draw bullets
+    // Draw bullets (in design coordinates)
     for (const bullet of this.bullets) {
       if (bullet.active) {
         if (bullet.isPlayer) {
@@ -478,23 +494,26 @@ export class SpaceInvaders extends GameEngine {
       }
     }
 
-    // Draw explosions
+    // Draw explosions (in design coordinates)
     for (const exp of this.explosions) {
       this.drawExplosion(exp);
     }
 
-    // Draw HUD with retro styling
+    // Draw HUD with retro styling (in design coordinates)
     this.drawHUD();
 
-    // Draw game over/won screens
+    // Draw game over/won screens (in design coordinates)
     if (this.gameState === 'gameOver' || this.gameState === 'won') {
       this.drawEndScreen();
     }
 
-    // Draw mobile controls if enabled
+    // Draw mobile controls if enabled (in design coordinates)
     if (this.config.useMobile && this.gameState === 'playing') {
       this.drawMobileControls();
     }
+
+    // Restore transform
+    this.ctx.restore();
 
     this.ctx.textAlign = 'left';
   }
@@ -655,21 +674,21 @@ export class SpaceInvaders extends GameEngine {
     this.ctx.fillStyle = '#33ff33';
     this.ctx.fillText(this.score.toString().padStart(5, '0'), 10, 35);
 
-    // High score display (center)
+    // High score display (center) - use design width
     this.ctx.fillStyle = '#ffffff';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('HIGH SCORE', this.config.width / 2, 18);
+    this.ctx.fillText('HIGH SCORE', this.DESIGN_WIDTH / 2, 18);
     this.ctx.fillStyle = '#ff3333';
-    this.ctx.fillText(this.highScore.toString().padStart(5, '0'), this.config.width / 2, 35);
+    this.ctx.fillText(this.highScore.toString().padStart(5, '0'), this.DESIGN_WIDTH / 2, 35);
 
-    // Lives display (right) - draw small ships
+    // Lives display (right) - draw small ships - use design width
     this.ctx.fillStyle = '#ffffff';
     this.ctx.textAlign = 'right';
-    this.ctx.fillText('LIVES', this.config.width - 10, 18);
+    this.ctx.fillText('LIVES', this.DESIGN_WIDTH - 10, 18);
 
     this.ctx.fillStyle = '#33ff33';
     for (let i = 0; i < this.lives; i++) {
-      const lx = this.config.width - 25 - i * 25;
+      const lx = this.DESIGN_WIDTH - 25 - i * 25;
       const ly = 25;
       // Mini ship icon
       this.ctx.fillRect(lx, ly + 6, 20, 4);
@@ -677,15 +696,15 @@ export class SpaceInvaders extends GameEngine {
       this.ctx.fillRect(lx + 8, ly, 4, 2);
     }
 
-    // Bottom line (ground)
+    // Bottom line (ground) - use design dimensions
     this.ctx.fillStyle = '#33ff33';
-    this.ctx.fillRect(0, this.config.height - 4, this.config.width, 2);
+    this.ctx.fillRect(0, this.DESIGN_HEIGHT - 4, this.DESIGN_WIDTH, 2);
   }
 
   private drawEndScreen(): void {
-    // Semi-transparent overlay
+    // Semi-transparent overlay - use design dimensions
     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-    this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+    this.ctx.fillRect(0, 0, this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
 
     this.ctx.textAlign = 'center';
 
@@ -693,39 +712,39 @@ export class SpaceInvaders extends GameEngine {
       // Game Over text with red glow
       this.ctx.fillStyle = '#ff0000';
       this.ctx.font = 'bold 36px "Courier New", monospace';
-      this.ctx.fillText('GAME OVER', this.config.width / 2, this.config.height / 2 - 40);
+      this.ctx.fillText('GAME OVER', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 - 40);
 
       // Decorative line
       this.ctx.strokeStyle = '#ff0000';
       this.ctx.lineWidth = 2;
       this.ctx.beginPath();
-      this.ctx.moveTo(this.config.width / 2 - 100, this.config.height / 2 - 15);
-      this.ctx.lineTo(this.config.width / 2 + 100, this.config.height / 2 - 15);
+      this.ctx.moveTo(this.DESIGN_WIDTH / 2 - 100, this.DESIGN_HEIGHT / 2 - 15);
+      this.ctx.lineTo(this.DESIGN_WIDTH / 2 + 100, this.DESIGN_HEIGHT / 2 - 15);
       this.ctx.stroke();
     } else {
       // Victory text with green glow
       this.ctx.fillStyle = '#00ff00';
       this.ctx.font = 'bold 36px "Courier New", monospace';
-      this.ctx.fillText('VICTORY!', this.config.width / 2, this.config.height / 2 - 40);
+      this.ctx.fillText('VICTORY!', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 - 40);
 
       // Decorative line
       this.ctx.strokeStyle = '#00ff00';
       this.ctx.lineWidth = 2;
       this.ctx.beginPath();
-      this.ctx.moveTo(this.config.width / 2 - 100, this.config.height / 2 - 15);
-      this.ctx.lineTo(this.config.width / 2 + 100, this.config.height / 2 - 15);
+      this.ctx.moveTo(this.DESIGN_WIDTH / 2 - 100, this.DESIGN_HEIGHT / 2 - 15);
+      this.ctx.lineTo(this.DESIGN_WIDTH / 2 + 100, this.DESIGN_HEIGHT / 2 - 15);
       this.ctx.stroke();
     }
 
     // Score display
     this.ctx.fillStyle = '#ffffff';
     this.ctx.font = '20px "Courier New", monospace';
-    this.ctx.fillText(`FINAL SCORE: ${this.score}`, this.config.width / 2, this.config.height / 2 + 20);
+    this.ctx.fillText(`FINAL SCORE: ${this.score}`, this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 20);
 
     // High score
     if (this.score >= this.highScore && this.score > 0) {
       this.ctx.fillStyle = '#ffff00';
-      this.ctx.fillText('NEW HIGH SCORE!', this.config.width / 2, this.config.height / 2 + 50);
+      this.ctx.fillText('NEW HIGH SCORE!', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 50);
     }
 
     // Restart instruction
@@ -733,25 +752,25 @@ export class SpaceInvaders extends GameEngine {
     this.ctx.font = '16px "Courier New", monospace';
     const blinkOn = Math.floor(Date.now() / 500) % 2 === 0;
     if (blinkOn) {
-      this.ctx.fillText('PRESS SPACE TO PLAY AGAIN', this.config.width / 2, this.config.height / 2 + 90);
+      this.ctx.fillText('PRESS SPACE TO PLAY AGAIN', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 90);
     }
   }
 
   private drawMobileControls(): void {
     this.ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
 
-    // Left button
-    this.ctx.fillRect(10, this.config.height - 55, 50, 45);
+    // Left button - use design dimensions
+    this.ctx.fillRect(10, this.DESIGN_HEIGHT - 55, 50, 45);
     // Right button
-    this.ctx.fillRect(this.config.width - 60, this.config.height - 55, 50, 45);
+    this.ctx.fillRect(this.DESIGN_WIDTH - 60, this.DESIGN_HEIGHT - 55, 50, 45);
     // Fire button
-    this.ctx.fillRect(this.config.width / 2 - 35, this.config.height - 55, 70, 45);
+    this.ctx.fillRect(this.DESIGN_WIDTH / 2 - 35, this.DESIGN_HEIGHT - 55, 70, 45);
 
     this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     this.ctx.font = 'bold 18px "Courier New", monospace';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('<', 35, this.config.height - 27);
-    this.ctx.fillText('>', this.config.width - 35, this.config.height - 27);
-    this.ctx.fillText('FIRE', this.config.width / 2, this.config.height - 27);
+    this.ctx.fillText('<', 35, this.DESIGN_HEIGHT - 27);
+    this.ctx.fillText('>', this.DESIGN_WIDTH - 35, this.DESIGN_HEIGHT - 27);
+    this.ctx.fillText('FIRE', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT - 27);
   }
 }

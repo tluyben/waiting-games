@@ -7,6 +7,8 @@ export declare class Pong extends GameEngine {
     private leftScore;
     private rightScore;
     private gameState;
+    private readonly DESIGN_WIDTH;
+    private readonly DESIGN_HEIGHT;
     constructor(container: HTMLElement | string, config?: GameConfig);
     private initGame;
     protected handleKeyDown(event: KeyboardEvent): void;

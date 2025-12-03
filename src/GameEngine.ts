@@ -10,11 +10,17 @@ export abstract class GameEngine implements GameInstance {
   protected isRunning = false;
   protected isPaused = false;
 
+  // Design dimensions - the reference size that games are designed for
+  protected designWidth: number;
+  protected designHeight: number;
+  // Scale factor to convert design coordinates to actual canvas coordinates
+  protected scale: number;
+
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
-    const element = typeof container === 'string' 
-      ? document.querySelector(container) 
+    const element = typeof container === 'string'
+      ? document.querySelector(container)
       : container;
-    
+
     if (!element) {
       throw new Error('Container element not found');
     }
@@ -40,12 +46,22 @@ export abstract class GameEngine implements GameInstance {
       ...this.config.keys
     };
 
+    // Default design dimensions - subclasses can override these
+    this.designWidth = 600;
+    this.designHeight = 450;
+
+    // Calculate scale based on the smaller ratio to maintain aspect ratio
+    this.scale = Math.min(
+      this.config.width / this.designWidth,
+      this.config.height / this.designHeight
+    );
+
     this.canvas = document.createElement('canvas');
     this.canvas.width = this.config.width;
     this.canvas.height = this.config.height;
     this.canvas.style.border = '2px solid #333';
     this.canvas.style.backgroundColor = '#000';
-    
+
     const ctx = this.canvas.getContext('2d');
     if (!ctx) {
       throw new Error('Could not get 2D context');
@@ -55,6 +71,40 @@ export abstract class GameEngine implements GameInstance {
     element.appendChild(this.canvas);
 
     this.setupControls();
+  }
+
+  // Set design dimensions and recalculate scale
+  protected setDesignDimensions(width: number, height: number): void {
+    this.designWidth = width;
+    this.designHeight = height;
+    this.scale = Math.min(
+      this.config.width / this.designWidth,
+      this.config.height / this.designHeight
+    );
+  }
+
+  // Convert design coordinate to actual canvas coordinate
+  protected scaleX(x: number): number {
+    return x * this.scale;
+  }
+
+  protected scaleY(y: number): number {
+    return y * this.scale;
+  }
+
+  // Scale a value (used for sizes, speeds, etc.)
+  protected scaleValue(v: number): number {
+    return v * this.scale;
+  }
+
+  // Get the scaled width (effective game area width in design coordinates)
+  protected get scaledWidth(): number {
+    return this.config.width / this.scale;
+  }
+
+  // Get the scaled height (effective game area height in design coordinates)
+  protected get scaledHeight(): number {
+    return this.config.height / this.scale;
   }
 
   protected setupControls(): void {

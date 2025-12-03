@@ -16,15 +16,21 @@ interface Paddle {
 }
 
 export class Pong extends GameEngine {
-  private ball: Ball;
-  private leftPaddle: Paddle;
-  private rightPaddle: Paddle;
+  private ball!: Ball;
+  private leftPaddle!: Paddle;
+  private rightPaddle!: Paddle;
   private leftScore = 0;
   private rightScore = 0;
   private gameState: 'waiting' | 'playing' | 'paused' = 'waiting';
 
+  // Design dimensions - the reference size that the game is designed for
+  private readonly DESIGN_WIDTH = 400;
+  private readonly DESIGN_HEIGHT = 300;
+
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     super(container, config);
+    // Set design dimensions for proper scaling
+    this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
     this.initGame();
   }
 
@@ -34,8 +40,8 @@ export class Pong extends GameEngine {
     const paddleSpeed = 5;
 
     this.ball = {
-      x: this.config.width / 2,
-      y: this.config.height / 2,
+      x: this.DESIGN_WIDTH / 2,
+      y: this.DESIGN_HEIGHT / 2,
       vx: Math.random() < 0.5 ? -3 : 3,
       vy: Math.random() * 4 - 2,
       radius: 8
@@ -43,15 +49,15 @@ export class Pong extends GameEngine {
 
     this.leftPaddle = {
       x: 20,
-      y: this.config.height / 2 - paddleHeight / 2,
+      y: this.DESIGN_HEIGHT / 2 - paddleHeight / 2,
       width: paddleWidth,
       height: paddleHeight,
       speed: paddleSpeed
     };
 
     this.rightPaddle = {
-      x: this.config.width - 30,
-      y: this.config.height / 2 - paddleHeight / 2,
+      x: this.DESIGN_WIDTH - 30,
+      y: this.DESIGN_HEIGHT / 2 - paddleHeight / 2,
       width: paddleWidth,
       height: paddleHeight,
       speed: paddleSpeed
@@ -84,22 +90,23 @@ export class Pong extends GameEngine {
 
   protected handleTouchStart(event: TouchEvent): void {
     super.handleTouchStart(event);
-    
+
     const touch = event.touches[0];
     const rect = this.canvas.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    
+    // Convert touch position to design coordinates
+    const x = (touch.clientX - rect.left) / this.scale;
+    const y = (touch.clientY - rect.top) / this.scale;
+
     if (this.gameState === 'waiting') {
       this.gameState = 'playing';
       return;
     }
 
     // Only allow touch control of right paddle (human player)
-    if (x > this.config.width / 2) {
+    if (x > this.DESIGN_WIDTH / 2) {
       this.rightPaddle.y = y - this.rightPaddle.height / 2;
     }
-    
+
     this.clampPaddles();
   }
 
@@ -109,8 +116,8 @@ export class Pong extends GameEngine {
   }
 
   private clampPaddles(): void {
-    this.leftPaddle.y = Math.max(0, Math.min(this.config.height - this.leftPaddle.height, this.leftPaddle.y));
-    this.rightPaddle.y = Math.max(0, Math.min(this.config.height - this.rightPaddle.height, this.rightPaddle.y));
+    this.leftPaddle.y = Math.max(0, Math.min(this.DESIGN_HEIGHT - this.leftPaddle.height, this.leftPaddle.y));
+    this.rightPaddle.y = Math.max(0, Math.min(this.DESIGN_HEIGHT - this.rightPaddle.height, this.rightPaddle.y));
   }
 
   protected update(): void {
@@ -120,7 +127,7 @@ export class Pong extends GameEngine {
     const leftPaddleCenter = this.leftPaddle.y + this.leftPaddle.height / 2;
     const ballY = this.ball.y;
     const aiSpeed = this.leftPaddle.speed * 0.8; // Slightly slower than human for fairness
-    
+
     if (ballY < leftPaddleCenter - 10) {
       this.leftPaddle.y -= aiSpeed;
     } else if (ballY > leftPaddleCenter + 10) {
@@ -142,7 +149,8 @@ export class Pong extends GameEngine {
     this.ball.x += this.ball.vx;
     this.ball.y += this.ball.vy;
 
-    if (this.ball.y <= this.ball.radius || this.ball.y >= this.config.height - this.ball.radius) {
+    // Use design dimensions for boundary checking
+    if (this.ball.y <= this.ball.radius || this.ball.y >= this.DESIGN_HEIGHT - this.ball.radius) {
       this.ball.vy = -this.ball.vy;
     }
 
@@ -155,7 +163,7 @@ export class Pong extends GameEngine {
     if (this.ball.x < 0) {
       this.rightScore++;
       this.resetBall();
-    } else if (this.ball.x > this.config.width) {
+    } else if (this.ball.x > this.DESIGN_WIDTH) {
       this.leftScore++;
       this.resetBall();
     }
@@ -169,23 +177,28 @@ export class Pong extends GameEngine {
   }
 
   private resetBall(): void {
-    this.ball.x = this.config.width / 2;
-    this.ball.y = this.config.height / 2;
+    this.ball.x = this.DESIGN_WIDTH / 2;
+    this.ball.y = this.DESIGN_HEIGHT / 2;
     this.ball.vx = Math.random() < 0.5 ? -3 : 3;
     this.ball.vy = Math.random() * 4 - 2;
     this.gameState = 'waiting';
   }
 
   protected render(): void {
+    // Fill entire canvas with background
     this.ctx.fillStyle = '#000';
     this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+
+    // Apply scaling transform for all game rendering
+    this.ctx.save();
+    this.ctx.scale(this.scale, this.scale);
 
     this.ctx.setLineDash([5, 5]);
     this.ctx.strokeStyle = '#fff';
     this.ctx.lineWidth = 2;
     this.ctx.beginPath();
-    this.ctx.moveTo(this.config.width / 2, 0);
-    this.ctx.lineTo(this.config.width / 2, this.config.height);
+    this.ctx.moveTo(this.DESIGN_WIDTH / 2, 0);
+    this.ctx.lineTo(this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT);
     this.ctx.stroke();
     this.ctx.setLineDash([]);
 
@@ -199,33 +212,36 @@ export class Pong extends GameEngine {
 
     this.ctx.font = '30px Arial';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText(this.leftScore.toString(), this.config.width / 4, 50);
-    this.ctx.fillText(this.rightScore.toString(), (3 * this.config.width) / 4, 50);
+    this.ctx.fillText(this.leftScore.toString(), this.DESIGN_WIDTH / 4, 50);
+    this.ctx.fillText(this.rightScore.toString(), (3 * this.DESIGN_WIDTH) / 4, 50);
 
     // Player labels
     this.ctx.font = '12px Arial';
-    this.ctx.fillText('CPU', this.config.width / 4, 70);
-    this.ctx.fillText('YOU', (3 * this.config.width) / 4, 70);
+    this.ctx.fillText('CPU', this.DESIGN_WIDTH / 4, 70);
+    this.ctx.fillText('YOU', (3 * this.DESIGN_WIDTH) / 4, 70);
 
     if (this.gameState === 'waiting') {
       this.ctx.font = '20px Arial';
-      this.ctx.fillText('Press SPACE or tap to start', this.config.width / 2, this.config.height / 2 + 50);
+      this.ctx.fillText('Press SPACE or tap to start', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 50);
 
       if (this.config.useKeyboard) {
         this.ctx.font = '14px Arial';
-        this.ctx.fillText('Use W/S or Arrow keys to move', this.config.width / 2, this.config.height / 2 + 80);
+        this.ctx.fillText('Use W/S or Arrow keys to move', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 80);
       }
     } else if (this.gameState === 'paused') {
       this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      this.ctx.fillRect(0, 0, this.config.width, this.config.height);
-      
+      this.ctx.fillRect(0, 0, this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
+
       this.ctx.fillStyle = '#fff';
       this.ctx.font = '30px Arial';
-      this.ctx.fillText('PAUSED', this.config.width / 2, this.config.height / 2);
+      this.ctx.fillText('PAUSED', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2);
       this.ctx.font = '16px Arial';
-      this.ctx.fillText('Press SPACE to resume', this.config.width / 2, this.config.height / 2 + 30);
+      this.ctx.fillText('Press SPACE to resume', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 30);
     }
 
     this.ctx.textAlign = 'left';
+
+    // Restore transform
+    this.ctx.restore();
   }
 }

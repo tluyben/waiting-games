@@ -1,5 +1,5 @@
 import { GameEngine } from '../GameEngine';
-import { GameConfig, Point } from '../types';
+import { GameConfig } from '../types';
 
 interface Ship {
   x: number;
@@ -31,7 +31,7 @@ interface Asteroid {
 }
 
 export class Asteroids extends GameEngine {
-  private ship: Ship;
+  private ship!: Ship;
   private bullets: Bullet[] = [];
   private asteroids: Asteroid[] = [];
   private score = 0;
@@ -40,15 +40,21 @@ export class Asteroids extends GameEngine {
   private shootCooldown = 0;
   private invulnerabilityTime = 0;
 
+  // Design dimensions - the reference size that the game is designed for
+  private readonly DESIGN_WIDTH = 600;
+  private readonly DESIGN_HEIGHT = 450;
+
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     super(container, config);
+    // Set design dimensions for proper scaling
+    this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
     this.initGame();
   }
 
   private initGame(): void {
     this.ship = {
-      x: this.config.width / 2,
-      y: this.config.height / 2,
+      x: this.DESIGN_WIDTH / 2,
+      y: this.DESIGN_HEIGHT / 2,
       angle: 0,
       vx: 0,
       vy: 0,
@@ -68,14 +74,14 @@ export class Asteroids extends GameEngine {
 
   private createAsteroids(count: number): void {
     for (let i = 0; i < count; i++) {
-      this.createAsteroid(64, Math.random() * this.config.width, Math.random() * this.config.height);
+      this.createAsteroid(64, Math.random() * this.DESIGN_WIDTH, Math.random() * this.DESIGN_HEIGHT);
     }
   }
 
   private createAsteroid(size: number, x?: number, y?: number): void {
     this.asteroids.push({
-      x: x ?? Math.random() * this.config.width,
-      y: y ?? Math.random() * this.config.height,
+      x: x ?? Math.random() * this.DESIGN_WIDTH,
+      y: y ?? Math.random() * this.DESIGN_HEIGHT,
       vx: (Math.random() - 0.5) * 4,
       vy: (Math.random() - 0.5) * 4,
       angle: Math.random() * Math.PI * 2,
@@ -85,10 +91,10 @@ export class Asteroids extends GameEngine {
   }
 
   private wrapPosition(obj: { x: number; y: number }): void {
-    if (obj.x < 0) obj.x = this.config.width;
-    if (obj.x > this.config.width) obj.x = 0;
-    if (obj.y < 0) obj.y = this.config.height;
-    if (obj.y > this.config.height) obj.y = 0;
+    if (obj.x < 0) obj.x = this.DESIGN_WIDTH;
+    if (obj.x > this.DESIGN_WIDTH) obj.x = 0;
+    if (obj.y < 0) obj.y = this.DESIGN_HEIGHT;
+    if (obj.y > this.DESIGN_HEIGHT) obj.y = 0;
   }
 
   protected handleKeyDown(event: KeyboardEvent): void {
@@ -115,7 +121,7 @@ export class Asteroids extends GameEngine {
 
   protected handleTouchStart(event: TouchEvent): void {
     super.handleTouchStart(event);
-    
+
     if (this.gameState === 'gameOver') {
       this.initGame();
       return;
@@ -123,12 +129,13 @@ export class Asteroids extends GameEngine {
 
     const touch = event.touches[0];
     const rect = this.canvas.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    
-    const centerX = this.config.width / 2;
-    const centerY = this.config.height / 2;
-    
+    // Convert touch position to design coordinates
+    const x = (touch.clientX - rect.left) / this.scale;
+    const y = (touch.clientY - rect.top) / this.scale;
+
+    const centerX = this.DESIGN_WIDTH / 2;
+    const centerY = this.DESIGN_HEIGHT / 2;
+
     if (Math.abs(x - centerX) > Math.abs(y - centerY)) {
       // Horizontal touch - rotate
       if (x > centerX) {
@@ -184,7 +191,7 @@ export class Asteroids extends GameEngine {
     }
 
     this.ship.thrust = this.keys['ArrowUp'] || this.keys[this.keyMap.UP] || this.keys['w'] || this.keys['W'] || this.keys['thrust'];
-    
+
     if (this.ship.thrust) {
       const thrustPower = 0.3;
       this.ship.vx += Math.cos(this.ship.angle) * thrustPower;
@@ -215,8 +222,8 @@ export class Asteroids extends GameEngine {
       bullet.life--;
 
       // Remove bullets that go off screen (original Asteroids behavior)
-      if (bullet.x < 0 || bullet.x > this.config.width ||
-          bullet.y < 0 || bullet.y > this.config.height) {
+      if (bullet.x < 0 || bullet.x > this.DESIGN_WIDTH ||
+          bullet.y < 0 || bullet.y > this.DESIGN_HEIGHT) {
         bullet.active = false;
         return false;
       }
@@ -231,7 +238,7 @@ export class Asteroids extends GameEngine {
     // Update asteroids
     for (const asteroid of this.asteroids) {
       if (!asteroid.active) continue;
-      
+
       asteroid.x += asteroid.vx;
       asteroid.y += asteroid.vy;
       asteroid.angle += 0.02;
@@ -251,18 +258,18 @@ export class Asteroids extends GameEngine {
     // Bullet vs Asteroid collisions
     for (const bullet of this.bullets) {
       if (!bullet.active) continue;
-      
+
       for (const asteroid of this.asteroids) {
         if (!asteroid.active) continue;
-        
+
         const dx = bullet.x - asteroid.x;
         const dy = bullet.y - asteroid.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        
+
         if (distance < asteroid.size / 2) {
           bullet.active = false;
           asteroid.active = false;
-          
+
           // Score based on asteroid size
           if (asteroid.size >= 64) {
             this.score += 20;
@@ -271,7 +278,7 @@ export class Asteroids extends GameEngine {
           } else {
             this.score += 100;
           }
-          
+
           // Split asteroid
           if (asteroid.size >= 32) {
             const newSize = asteroid.size / 2;
@@ -288,22 +295,22 @@ export class Asteroids extends GameEngine {
     if (this.invulnerabilityTime <= 0) {
       for (const asteroid of this.asteroids) {
         if (!asteroid.active) continue;
-        
+
         const dx = this.ship.x - asteroid.x;
         const dy = this.ship.y - asteroid.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        
+
         if (distance < (asteroid.size / 2) + this.ship.size) {
           this.lives--;
           this.invulnerabilityTime = 120;
-          
+
           // Reset ship position and velocity
-          this.ship.x = this.config.width / 2;
-          this.ship.y = this.config.height / 2;
+          this.ship.x = this.DESIGN_WIDTH / 2;
+          this.ship.y = this.DESIGN_HEIGHT / 2;
           this.ship.vx = 0;
           this.ship.vy = 0;
           this.ship.angle = 0;
-          
+
           if (this.lives <= 0) {
             this.gameState = 'gameOver';
           }
@@ -314,19 +321,24 @@ export class Asteroids extends GameEngine {
   }
 
   protected render(): void {
+    // Fill entire canvas with background
     this.ctx.fillStyle = '#000';
     this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+
+    // Apply scaling transform for all game rendering
+    this.ctx.save();
+    this.ctx.scale(this.scale, this.scale);
 
     // Draw asteroids
     this.ctx.strokeStyle = '#fff';
     this.ctx.lineWidth = 2;
     for (const asteroid of this.asteroids) {
       if (!asteroid.active) continue;
-      
+
       this.ctx.save();
       this.ctx.translate(asteroid.x, asteroid.y);
       this.ctx.rotate(asteroid.angle);
-      
+
       this.ctx.beginPath();
       const sides = 8;
       const radius = asteroid.size / 2;
@@ -335,7 +347,7 @@ export class Asteroids extends GameEngine {
         const r = radius + Math.sin(angle * 3) * (radius * 0.2);
         const x = Math.cos(angle) * r;
         const y = Math.sin(angle) * r;
-        
+
         if (i === 0) {
           this.ctx.moveTo(x, y);
         } else {
@@ -351,7 +363,7 @@ export class Asteroids extends GameEngine {
       this.ctx.save();
       this.ctx.translate(this.ship.x, this.ship.y);
       this.ctx.rotate(this.ship.angle);
-      
+
       this.ctx.strokeStyle = '#fff';
       this.ctx.lineWidth = 2;
       this.ctx.beginPath();
@@ -361,7 +373,7 @@ export class Asteroids extends GameEngine {
       this.ctx.lineTo(-this.ship.size / 2, this.ship.size / 2);
       this.ctx.closePath();
       this.ctx.stroke();
-      
+
       // Thrust flame
       if (this.ship.thrust) {
         this.ctx.strokeStyle = '#ff4400';
@@ -370,7 +382,7 @@ export class Asteroids extends GameEngine {
         this.ctx.lineTo(-this.ship.size * 1.5, 0);
         this.ctx.stroke();
       }
-      
+
       this.ctx.restore();
     }
 
@@ -392,35 +404,38 @@ export class Asteroids extends GameEngine {
 
     if (this.gameState === 'gameOver') {
       this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      this.ctx.fillRect(0, 0, this.config.width, this.config.height);
-      
+      this.ctx.fillRect(0, 0, this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
+
       this.ctx.fillStyle = '#fff';
       this.ctx.font = '30px Arial';
       this.ctx.textAlign = 'center';
-      this.ctx.fillText('Game Over!', this.config.width / 2, this.config.height / 2 - 20);
-      
+      this.ctx.fillText('Game Over!', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 - 20);
+
       this.ctx.font = '16px Arial';
-      this.ctx.fillText(`Final Score: ${this.score}`, this.config.width / 2, this.config.height / 2 + 10);
-      this.ctx.fillText('Press SPACE or tap to restart', this.config.width / 2, this.config.height / 2 + 40);
-      
+      this.ctx.fillText(`Final Score: ${this.score}`, this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 10);
+      this.ctx.fillText('Press SPACE or tap to restart', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 40);
+
       this.ctx.textAlign = 'left';
     } else if (this.config.useMobile) {
       // Mobile control hints
       this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-      this.ctx.fillRect(10, this.config.height - 60, 60, 50);
-      this.ctx.fillRect(this.config.width - 70, this.config.height - 60, 60, 50);
-      this.ctx.fillRect(this.config.width / 2 - 30, 10, 60, 50);
-      this.ctx.fillRect(this.config.width / 2 - 30, this.config.height - 60, 60, 50);
-      
+      this.ctx.fillRect(10, this.DESIGN_HEIGHT - 60, 60, 50);
+      this.ctx.fillRect(this.DESIGN_WIDTH - 70, this.DESIGN_HEIGHT - 60, 60, 50);
+      this.ctx.fillRect(this.DESIGN_WIDTH / 2 - 30, 10, 60, 50);
+      this.ctx.fillRect(this.DESIGN_WIDTH / 2 - 30, this.DESIGN_HEIGHT - 60, 60, 50);
+
       this.ctx.fillStyle = '#fff';
       this.ctx.font = '12px Arial';
       this.ctx.textAlign = 'center';
-      this.ctx.fillText('↺', 40, this.config.height - 30);
-      this.ctx.fillText('↻', this.config.width - 40, this.config.height - 30);
-      this.ctx.fillText('↑', this.config.width / 2, 35);
-      this.ctx.fillText('FIRE', this.config.width / 2, this.config.height - 30);
-      
+      this.ctx.fillText('↺', 40, this.DESIGN_HEIGHT - 30);
+      this.ctx.fillText('↻', this.DESIGN_WIDTH - 40, this.DESIGN_HEIGHT - 30);
+      this.ctx.fillText('↑', this.DESIGN_WIDTH / 2, 35);
+      this.ctx.fillText('FIRE', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT - 30);
+
       this.ctx.textAlign = 'left';
     }
+
+    // Restore transform
+    this.ctx.restore();
   }
 }

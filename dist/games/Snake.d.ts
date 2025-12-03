@@ -10,6 +10,8 @@ export declare class Snake extends GameEngine {
     private gameState;
     private moveTimer;
     private moveInterval;
+    private readonly DESIGN_WIDTH;
+    private readonly DESIGN_HEIGHT;
     constructor(container: HTMLElement | string, config?: GameConfig);
     private initGame;
     private generateFood;

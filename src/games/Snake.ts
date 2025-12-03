@@ -19,8 +19,14 @@ export class Snake extends GameEngine {
   private moveTimer = 0;
   private moveInterval = 12; // Move every 12 frames (5 times per second at 60fps) - Slightly faster
 
+  // Design dimensions - the reference size that the game is designed for
+  private readonly DESIGN_WIDTH = 400;
+  private readonly DESIGN_HEIGHT = 300;
+
   constructor(container: HTMLElement | string, config: GameConfig = {}) {
     super(container, config);
+    // Set design dimensions for proper scaling
+    this.setDesignDimensions(this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
     this.initGame();
   }
 
@@ -35,9 +41,10 @@ export class Snake extends GameEngine {
   }
 
   private generateFood(): void {
-    const maxX = Math.floor(this.config.width / this.gridSize);
-    const maxY = Math.floor(this.config.height / this.gridSize);
-    
+    // Use design dimensions for food placement
+    const maxX = Math.floor(this.DESIGN_WIDTH / this.gridSize);
+    const maxY = Math.floor(this.DESIGN_HEIGHT / this.gridSize);
+
     this.food = {
       x: Math.floor(Math.random() * maxX) * this.gridSize,
       y: Math.floor(Math.random() * maxY) * this.gridSize
@@ -75,7 +82,7 @@ export class Snake extends GameEngine {
 
   protected handleTouchStart(event: TouchEvent): void {
     super.handleTouchStart(event);
-    
+
     if (this.gameOver) {
       this.initGame();
       this.start();
@@ -89,11 +96,12 @@ export class Snake extends GameEngine {
 
     const touch = event.touches[0];
     const rect = this.canvas.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    
-    const centerX = this.config.width / 2;
-    const centerY = this.config.height / 2;
+    // Convert touch position to design coordinates
+    const x = (touch.clientX - rect.left) / this.scale;
+    const y = (touch.clientY - rect.top) / this.scale;
+
+    const centerX = this.DESIGN_WIDTH / 2;
+    const centerY = this.DESIGN_HEIGHT / 2;
     
     const deltaX = x - centerX;
     const deltaY = y - centerY;
@@ -140,8 +148,9 @@ export class Snake extends GameEngine {
         break;
     }
 
-    if (head.x < 0 || head.x >= this.config.width || 
-        head.y < 0 || head.y >= this.config.height) {
+    // Use design dimensions for boundary checking
+    if (head.x < 0 || head.x >= this.DESIGN_WIDTH ||
+        head.y < 0 || head.y >= this.DESIGN_HEIGHT) {
       this.gameOver = true;
       return;
     }
@@ -164,8 +173,13 @@ export class Snake extends GameEngine {
   }
 
   protected render(): void {
+    // Fill the entire canvas with background
     this.ctx.fillStyle = '#000';
     this.ctx.fillRect(0, 0, this.config.width, this.config.height);
+
+    // Apply scaling transform for all game rendering
+    this.ctx.save();
+    this.ctx.scale(this.scale, this.scale);
 
     this.ctx.fillStyle = '#0f0';
     for (const segment of this.snake) {
@@ -181,32 +195,35 @@ export class Snake extends GameEngine {
 
     if (this.gameState === 'waiting') {
       this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      this.ctx.fillRect(0, 0, this.config.width, this.config.height);
-      
+      this.ctx.fillRect(0, 0, this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
+
       this.ctx.fillStyle = '#fff';
       this.ctx.font = '30px Arial';
       this.ctx.textAlign = 'center';
-      this.ctx.fillText('Snake', this.config.width / 2, this.config.height / 2 - 20);
-      
+      this.ctx.fillText('Snake', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 - 20);
+
       this.ctx.font = '16px Arial';
-      this.ctx.fillText('Press SPACE or tap to start', this.config.width / 2, this.config.height / 2 + 10);
-      
+      this.ctx.fillText('Press SPACE or tap to start', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 10);
+
       this.ctx.textAlign = 'left';
     } else if (this.gameOver) {
       this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      this.ctx.fillRect(0, 0, this.config.width, this.config.height);
-      
+      this.ctx.fillRect(0, 0, this.DESIGN_WIDTH, this.DESIGN_HEIGHT);
+
       this.ctx.fillStyle = '#fff';
       this.ctx.font = '30px Arial';
       this.ctx.textAlign = 'center';
-      this.ctx.fillText('Game Over!', this.config.width / 2, this.config.height / 2 - 20);
-      
+      this.ctx.fillText('Game Over!', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 - 20);
+
       this.ctx.font = '16px Arial';
-      this.ctx.fillText(`Final Score: ${this.score}`, this.config.width / 2, this.config.height / 2 + 10);
-      this.ctx.fillText('Press SPACE or tap to restart', this.config.width / 2, this.config.height / 2 + 40);
-      
+      this.ctx.fillText(`Final Score: ${this.score}`, this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 10);
+      this.ctx.fillText('Press SPACE or tap to restart', this.DESIGN_WIDTH / 2, this.DESIGN_HEIGHT / 2 + 40);
+
       this.ctx.textAlign = 'left';
     }
+
+    // Restore transform
+    this.ctx.restore();
   }
 
   start(): void {
