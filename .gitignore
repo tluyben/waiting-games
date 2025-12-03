@@ -50,3 +50,18 @@ coverage/
 # Temporary folders
 tmp/
 temp/
+# claude4ever directories and files
+/running_tasks/
+/complete_tasks/
+/dbackups/
+/sub_tasks/
+/tasks/
+/tasks/pointer
+/claude4ever
+/docker-compose.claude.yml
+/test-results/
+/.running
+/.app-restarted
+/.new-admin
+/control-watcher.sh
+/test-control-files.sh

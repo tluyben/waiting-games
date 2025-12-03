@@ -12,8 +12,11 @@
   ],
   "scripts": {
     "build": "rollup -c && rm -rf docs/dist && cp -r dist docs/",
-    "dev": "rollup -c -w",
+    "dev": "npm run build && node server.js",
+    "dev:watch": "rollup -c -w",
+    "serve": "node server.js",
     "test": "jest",
+    "check": "tsc --noEmit",
     "clean": "rm -rf dist/ docs/dist/",
     "prepublishOnly": "npm run clean && npm run build",
     "publish:patch": "npm version patch && npm publish",
