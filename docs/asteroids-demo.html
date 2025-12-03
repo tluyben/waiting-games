@@ -243,8 +243,8 @@
 
     <div class="view-toggle">
         <h4>🎮 GAME VIEW SIZE</h4>
-        <button class="size-button active" onclick="setGameSize('small')">SMALL (400×300)</button>
-        <button class="size-button" onclick="setGameSize('large')">LARGE (600×450)</button>
+        <button class="size-button" onclick="setGameSize('small')">SMALL (400×300)</button>
+        <button class="size-button active" onclick="setGameSize('large')">LARGE (600×450)</button>
     </div>
 
     <div class="game-container">
@@ -299,7 +299,7 @@
     <script src="./dist/waiting-games.js"></script>
     <script>
         let asteroidsGame;
-        let currentSize = 'small';
+        let currentSize = 'large';
         
         const gameSizes = {
             small: { width: 400, height: 300 },
