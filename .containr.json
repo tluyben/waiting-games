@@ -1,0 +1,18 @@
+{
+  "name": "Waiting Games",
+  "description": "",
+  "tech": {
+    "language": ["typescript"],
+    "database": [],
+    "framework": ["clean"]
+  },
+  "replica": 1,
+  "shared": true,
+  "compose": "./docker-compose.claude.yml",
+  "mapping": {
+    "production": 2999,
+    "testing": 3000
+  },
+  "backup": [],
+  "domains": [{"name": "4lfq6672.vibecode.my", "type": "testing"}, {"name": "waiting-games.my", "type": "testing"}]
+}
